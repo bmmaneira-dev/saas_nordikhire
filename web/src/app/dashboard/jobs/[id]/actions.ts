@@ -16,6 +16,10 @@ import {
   type Locale,
 } from "@/lib/translate-job";
 import { generateDevelopmentReport } from "@/lib/development-report";
+import {
+  generateFeedbackDraftMessage,
+  type FeedbackDraftType,
+} from "@/lib/feedback-messages";
 
 const VALID_TEST_CATEGORIES: TestCategory[] = ["technical", "behavioral", "psychometric"];
 
@@ -331,4 +335,91 @@ export async function generateReport(applicationId: string, jobId: string) {
   );
 
   revalidatePath(`/dashboard/jobs/${jobId}`);
+}
+
+export async function generateFeedbackDraft(
+  applicationId: string,
+  jobId: string,
+  draftType: FeedbackDraftType
+) {
+  const appUser = await getCurrentAppUser();
+  if (!appUser) redirect("/login");
+  const admin = createAdminClient();
+
+  const { data: application } = await admin
+    .from("applications")
+    .select(
+      "id, candidates(full_name), scoring_results(overall_score, breakdown, ai_reasoning, created_at), red_flags(flag_type, severity, description), candidate_development_reports(strengths, technical_gaps, behavioral_gaps, training_recommendations, overall_summary)"
+    )
+    .eq("id", applicationId)
+    .eq("company_id", appUser.company_id)
+    .maybeSingle();
+  if (!application) return { error: "Candidatura não encontrada." };
+
+  const { data: job } = await admin
+    .from("jobs")
+    .select("job_translations(title, locale)")
+    .eq("id", jobId)
+    .eq("company_id", appUser.company_id)
+    .maybeSingle();
+  if (!job) return { error: "Vaga não encontrada." };
+
+  const jobTitle =
+    job.job_translations.find((t: { locale: string }) => t.locale === "pt")
+      ?.title ?? job.job_translations[0]?.title ?? "";
+
+  const candidate = Array.isArray(application.candidates)
+    ? application.candidates[0]
+    : application.candidates;
+
+  const scoringRows = Array.isArray(application.scoring_results)
+    ? application.scoring_results
+    : application.scoring_results
+      ? [application.scoring_results]
+      : [];
+  const scoring = [...scoringRows].sort((a, b) =>
+    a.created_at < b.created_at ? 1 : -1
+  )[0];
+
+  const redFlags = Array.isArray(application.red_flags)
+    ? application.red_flags
+    : application.red_flags
+      ? [application.red_flags]
+      : [];
+
+  const devReport = Array.isArray(application.candidate_development_reports)
+    ? application.candidate_development_reports[0]
+    : application.candidate_development_reports;
+
+  try {
+    const message = await generateFeedbackDraftMessage({
+      type: draftType,
+      jobTitle,
+      candidateName: candidate?.full_name ?? "Candidato",
+      cvScore: scoring?.overall_score ?? null,
+      cvBreakdown: scoring?.breakdown ?? null,
+      cvReasoning: scoring?.ai_reasoning ?? null,
+      redFlags: redFlags.map((f) => ({
+        flag_type: f.flag_type,
+        severity: f.severity,
+        description: f.description,
+      })),
+      report: devReport
+        ? {
+            strengths: devReport.strengths,
+            technical_gaps: devReport.technical_gaps,
+            behavioral_gaps: devReport.behavioral_gaps,
+            training_recommendations: devReport.training_recommendations,
+            overall_summary: devReport.overall_summary,
+          }
+        : null,
+    });
+    return { message };
+  } catch (err) {
+    return {
+      error:
+        "Erro ao gerar rascunho: " +
+        (err instanceof Error ? err.message : String(err)),
+    };
+  }
 }

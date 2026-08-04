@@ -22,7 +22,8 @@ import {
 import { Card } from "@/components/ui/card";
 import { Badge, statusVariant } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Textarea, Select } from "@/components/ui/field";
+import { Select } from "@/components/ui/field";
+import { FeedbackComposer } from "./feedback-composer";
 
 const STAGE_ORDER = [
   "received",
@@ -690,38 +691,30 @@ export default async function JobDetailPage({
                         <summary className="cursor-pointer list-none text-sm font-medium text-danger underline">
                           Rejeitar
                         </summary>
-                        <form
-                          action={rejectApplication.bind(null, application.id, job.id)}
-                          className="mt-2 flex max-w-sm flex-col gap-2"
-                        >
-                          <Textarea
-                            name="feedback"
-                            rows={2}
-                            placeholder="Motivo / feedback para o candidato (opcional)"
-                          />
-                          <Button type="submit" variant="danger" size="sm" className="self-start">
-                            Confirmar rejeição
-                          </Button>
-                        </form>
+                        <FeedbackComposer
+                          applicationId={application.id}
+                          jobId={job.id}
+                          draftType="rejection"
+                          formAction={rejectApplication.bind(null, application.id, job.id)}
+                          placeholder="Motivo / feedback para o candidato (opcional)"
+                          submitLabel="Confirmar rejeição"
+                          submitVariant="danger"
+                        />
                       </details>
                       <details className="w-full sm:w-auto">
                         <summary className="cursor-pointer list-none text-sm font-medium text-primary underline">
                           Enviar feedback
                         </summary>
-                        <form
-                          action={sendFeedback.bind(null, application.id, job.id)}
-                          className="mt-2 flex max-w-sm flex-col gap-2"
-                        >
-                          <Textarea
-                            name="feedback"
-                            rows={2}
-                            required
-                            placeholder="Mensagem para o candidato"
-                          />
-                          <Button type="submit" variant="secondary" size="sm" className="self-start">
-                            Enviar
-                          </Button>
-                        </form>
+                        <FeedbackComposer
+                          applicationId={application.id}
+                          jobId={job.id}
+                          draftType="general"
+                          formAction={sendFeedback.bind(null, application.id, job.id)}
+                          required
+                          placeholder="Mensagem para o candidato"
+                          submitLabel="Enviar"
+                          submitVariant="secondary"
+                        />
                       </details>
                       <details className="w-full sm:w-auto">
                         <summary className="cursor-pointer list-none text-sm font-medium text-primary underline">
