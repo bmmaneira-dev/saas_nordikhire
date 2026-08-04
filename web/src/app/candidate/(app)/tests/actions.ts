@@ -92,6 +92,7 @@ export async function submitTestAnswers(
     .eq("id", assignmentId);
 
   revalidatePath(`/candidate/tests/${assignmentId}`);
+  revalidatePath("/candidate/tests");
   revalidatePath("/candidate/dashboard");
   return { success: true };
 }

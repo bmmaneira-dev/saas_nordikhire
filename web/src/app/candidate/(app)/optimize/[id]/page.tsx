@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { SectionFeedback } from "@/lib/profile-optimization";
-import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -38,11 +37,9 @@ export default async function OptimizationResultPage({
   const weaknesses = (optimization.weaknesses ?? []) as string[];
 
   return (
-    <>
-      <PageHeader href="/candidate/dashboard" />
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-12">
+    <div className="mx-auto flex w-full max-w-2xl flex-col">
         <Link
-          href="/candidate/dashboard"
+          href="/candidate/development"
           className="text-sm text-muted-foreground underline"
         >
           ← Voltar
@@ -123,7 +120,6 @@ export default async function OptimizationResultPage({
             </ul>
           </section>
         )}
-      </main>
-    </>
+    </div>
   );
 }

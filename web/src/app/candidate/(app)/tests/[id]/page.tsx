@@ -3,7 +3,6 @@ import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
 import { PSYCHOMETRIC_DISCLAIMER } from "@/lib/skill-tests";
-import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { TestForm } from "./test-form";
 
@@ -52,9 +51,7 @@ export default async function CandidateTestPage({
   const perQuestion = resultRaw?.per_question ?? [];
 
   return (
-    <>
-      <PageHeader href="/candidate/dashboard" />
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-12">
+    <div className="mx-auto flex w-full max-w-2xl flex-col">
         <p className="text-sm text-muted-foreground">
           {translation?.title ?? "Candidatura"}
         </p>
@@ -102,7 +99,6 @@ export default async function CandidateTestPage({
         ) : (
           <TestForm assignmentId={assignment.id} questions={questions} />
         )}
-      </main>
-    </>
+    </div>
   );
 }

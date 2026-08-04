@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { startOptimization } from "../actions";
-import { PageHeader } from "@/components/page-header";
 import { Field, Input, Textarea, Select } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 
@@ -14,11 +13,9 @@ export default function NewOptimizationPage() {
   );
 
   return (
-    <>
-      <PageHeader href="/candidate/dashboard" />
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-6 py-12">
+    <div className="mx-auto flex w-full max-w-xl flex-col">
         <Link
-          href="/candidate/dashboard"
+          href="/candidate/development"
           className="text-sm text-muted-foreground underline"
         >
           ← Voltar
@@ -63,7 +60,6 @@ export default function NewOptimizationPage() {
             {pending ? "A analisar..." : "Analisar e melhorar"}
           </Button>
         </form>
-      </main>
-    </>
+    </div>
   );
 }

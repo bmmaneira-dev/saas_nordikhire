@@ -4,7 +4,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { TranscriptTurn } from "@/lib/ai-interview";
 import { PracticeVoiceChat } from "./voice-chat";
 import { endPractice } from "../actions";
-import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 
 interface Evaluation {
@@ -38,9 +37,7 @@ export default async function PracticeSessionPage({
   const evaluation = practice.ai_evaluation as Evaluation | null;
 
   return (
-    <>
-      <PageHeader href="/candidate/dashboard" />
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-12">
+    <div className="mx-auto flex w-full max-w-2xl flex-col">
         <p className="text-sm text-muted-foreground">Prática de entrevista</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">
           {practice.target_role}
@@ -106,7 +103,6 @@ export default async function PracticeSessionPage({
             </form>
           </>
         )}
-      </main>
-    </>
+    </div>
   );
 }
