@@ -4,6 +4,7 @@ import { getCurrentCandidate } from "@/lib/current-candidate";
 import { candidateLogout } from "@/app/candidate/login/actions";
 import { CandidateSidebar } from "@/components/candidate-sidebar";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function CandidateAppLayout({
   children,
@@ -24,11 +25,14 @@ export default async function CandidateAppLayout({
             </p>
             <p className="text-xs text-muted-foreground">{candidate.email}</p>
           </div>
-          <form action={candidateLogout}>
-            <Button type="submit" variant="secondary" size="sm">
-              Sair
-            </Button>
-          </form>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <form action={candidateLogout}>
+              <Button type="submit" variant="secondary" size="sm">
+                Sair
+              </Button>
+            </form>
+          </div>
         </header>
         <main className="flex-1 px-8 py-8">{children}</main>
       </div>

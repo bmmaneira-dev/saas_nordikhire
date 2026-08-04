@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Logo } from "@/components/ui/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AuthShell({
   title,
@@ -13,7 +14,8 @@ export function AuthShell({
   footer: ReactNode;
 }) {
   return (
-    <main className="flex flex-1 items-center justify-center px-4 py-16">
+    <main className="relative flex flex-1 items-center justify-center px-4 py-16">
+      <ThemeToggle className="absolute right-4 top-4" />
       <div className="w-full max-w-sm">
         <Logo className="mb-8 justify-center text-lg" />
         <div className="rounded-2xl border border-surface-border bg-surface p-8 shadow-sm">

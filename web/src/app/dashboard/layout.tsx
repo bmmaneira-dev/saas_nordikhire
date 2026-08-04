@@ -5,6 +5,7 @@ import { logout } from "@/app/login/actions";
 import { toOne } from "@/lib/to-one";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default async function DashboardLayout({
   children,
@@ -29,11 +30,14 @@ export default async function DashboardLayout({
               {appUser.full_name} · {appUser.email}
             </p>
           </div>
-          <form action={logout}>
-            <Button type="submit" variant="secondary" size="sm">
-              Sair
-            </Button>
-          </form>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <form action={logout}>
+              <Button type="submit" variant="secondary" size="sm">
+                Sair
+              </Button>
+            </form>
+          </div>
         </header>
         <main className="flex-1 px-8 py-8">{children}</main>
       </div>
