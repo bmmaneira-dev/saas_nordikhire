@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import type {
   InputHTMLAttributes,
   ReactNode,
@@ -30,6 +33,36 @@ export function Input({
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { ref?: Ref<HTMLInputElement> }) {
   return <input ref={ref} {...props} className={`${fieldClass} ${className}`} />;
+}
+
+export function PasswordInput({
+  className = "",
+  ref,
+  ...props
+}: Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
+  ref?: Ref<HTMLInputElement>;
+}) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div className="relative">
+      <input
+        ref={ref}
+        type={visible ? "text" : "password"}
+        {...props}
+        className={`${fieldClass} w-full pr-11 ${className}`}
+      />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        tabIndex={-1}
+        aria-label={visible ? "Ocultar password" : "Mostrar password"}
+        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground hover:text-foreground"
+      >
+        {visible ? "Ocultar" : "Ver"}
+      </button>
+    </div>
+  );
 }
 
 export function Textarea({

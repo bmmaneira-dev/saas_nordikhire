@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { AuthShell } from "@/components/auth-shell";
-import { Field, Input } from "@/components/ui/field";
+import { Field, Input, PasswordInput } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { candidateSignup } from "./actions";
 
@@ -34,7 +34,7 @@ export default function CandidateSignupPage() {
           <Input type="email" name="email" required />
         </Field>
         <Field label="Password">
-          <Input type="password" name="password" required minLength={8} />
+          <PasswordInput name="password" required minLength={8} />
         </Field>
 
         <label className="flex items-start gap-2 text-sm text-foreground">

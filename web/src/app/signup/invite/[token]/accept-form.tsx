@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { acceptInvite } from "./actions";
-import { Field, Input } from "@/components/ui/field";
+import { Field, Input, PasswordInput } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 
 export function InviteAcceptForm({
@@ -31,7 +31,7 @@ export function InviteAcceptForm({
         />
       </Field>
       <Field label="Password">
-        <Input type="password" name="password" required minLength={8} />
+        <PasswordInput name="password" required minLength={8} />
       </Field>
 
       {state?.error && <p className="text-sm text-danger">{state.error}</p>}

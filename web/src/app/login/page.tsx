@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { AuthShell } from "@/components/auth-shell";
-import { Field, Input } from "@/components/ui/field";
+import { Field, Input, PasswordInput } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { login } from "./actions";
 
@@ -28,7 +28,7 @@ export default function LoginPage() {
           <Input type="email" name="email" required />
         </Field>
         <Field label="Password">
-          <Input type="password" name="password" required />
+          <PasswordInput name="password" required />
         </Field>
 
         {state?.error && <p className="text-sm text-danger">{state.error}</p>}
