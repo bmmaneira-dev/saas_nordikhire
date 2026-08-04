@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { createJob } from "../actions";
-import { PageHeader } from "@/components/page-header";
 import { Field, Input, Textarea, Select } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 
@@ -11,18 +10,16 @@ export default function NewJobPage() {
   const [state, formAction, pending] = useActionState(createJob, undefined);
 
   return (
-    <>
-      <PageHeader />
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-12">
-        <Link
-          href="/dashboard"
-          className="text-sm text-muted-foreground underline"
-        >
-          ← Voltar ao dashboard
-        </Link>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight">
-          Nova vaga
-        </h1>
+    <div className="mx-auto flex w-full max-w-2xl flex-col">
+      <Link
+        href="/dashboard/jobs"
+        className="text-sm text-muted-foreground underline"
+      >
+        ← Voltar às vagas
+      </Link>
+      <h1 className="mt-4 text-2xl font-semibold tracking-tight">
+        Nova vaga
+      </h1>
 
         <form action={formAction} className="mt-8 flex flex-col gap-4">
           <Field label="Título">
@@ -94,7 +91,6 @@ export default function NewJobPage() {
             {pending ? "A criar..." : "Criar vaga"}
           </Button>
         </form>
-      </main>
-    </>
+    </div>
   );
 }

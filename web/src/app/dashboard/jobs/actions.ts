@@ -84,6 +84,7 @@ export async function createJob(_prevState: unknown, formData: FormData) {
     return { error: "Erro ao guardar conteúdo da vaga: " + translationError.message };
   }
 
+  revalidatePath("/dashboard/jobs");
   revalidatePath("/dashboard");
-  redirect("/dashboard");
+  redirect("/dashboard/jobs");
 }

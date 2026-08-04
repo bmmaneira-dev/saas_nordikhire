@@ -6,7 +6,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
 import { revokeInvite, setTeammateActive } from "./actions";
 import { InviteForm } from "./invite-form";
-import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,14 +70,12 @@ export default async function TeamPage() {
       : `http://${headerList.get("host") ?? "localhost:3000"}`;
 
   return (
-    <>
-      <PageHeader />
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-12">
+    <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Link
-          href="/dashboard"
+          href="/dashboard/company"
           className="text-sm text-muted-foreground underline"
         >
-          ← Voltar ao dashboard
+          ← Voltar à empresa
         </Link>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight">Equipa</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -178,7 +175,6 @@ export default async function TeamPage() {
             })}
           </ul>
         </section>
-      </main>
-    </>
+    </div>
   );
 }

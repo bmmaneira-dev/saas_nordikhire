@@ -5,7 +5,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
 import { getOrCreateSubscription, getUsageCounts, type PlanInfo } from "@/lib/billing";
 import { changePlan } from "./actions";
-import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -100,14 +99,12 @@ export default async function BillingPage() {
       : null;
 
   return (
-    <>
-      <PageHeader />
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-12">
+    <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Link
-          href="/dashboard"
+          href="/dashboard/company"
           className="text-sm text-muted-foreground underline"
         >
-          ← Voltar ao dashboard
+          ← Voltar à empresa
         </Link>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight">
           Facturação
@@ -205,7 +202,6 @@ export default async function BillingPage() {
             })}
           </div>
         </section>
-      </main>
-    </>
+    </div>
   );
 }

@@ -19,7 +19,6 @@ import {
   RECOMMENDATION_LABELS,
   type TestRecommendation,
 } from "@/lib/skill-tests";
-import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge, statusVariant } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -210,14 +209,12 @@ export default async function JobDetailPage({
   });
 
   return (
-    <>
-      <PageHeader />
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-12">
+      <div className="mx-auto flex w-full max-w-3xl flex-col">
         <Link
-          href="/dashboard"
+          href="/dashboard/jobs"
           className="text-sm text-muted-foreground underline"
         >
-          ← Voltar ao dashboard
+          ← Voltar às vagas
         </Link>
         <div className="mt-4 flex items-center justify-between">
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -744,7 +741,6 @@ export default async function JobDetailPage({
             );
           })}
         </ul>
-      </main>
-    </>
+      </div>
   );
 }
