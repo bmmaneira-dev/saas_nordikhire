@@ -13,12 +13,17 @@ PDFParse.setWorker(getPath());
 // support.
 const MODEL = "claude-haiku-4-5";
 
+export const CV_BUCKET = "cvs";
+
 const SCORING_SCHEMA = {
   type: "object",
   properties: {
     extraction: {
       type: "object",
       properties: {
+        full_name: { type: ["string", "null"] },
+        email: { type: ["string", "null"] },
+        phone: { type: ["string", "null"] },
         skills: { type: "array", items: { type: "string" } },
         experience_years: { type: ["number", "null"] },
         education: { type: "array", items: { type: "string" } },
@@ -26,6 +31,9 @@ const SCORING_SCHEMA = {
         previous_roles: { type: "array", items: { type: "string" } },
       },
       required: [
+        "full_name",
+        "email",
+        "phone",
         "skills",
         "experience_years",
         "education",
@@ -78,7 +86,7 @@ const SCORING_SCHEMA = {
   additionalProperties: false,
 } as const;
 
-interface JobContext {
+export interface JobContext {
   title: string;
   description: string | null;
   requirementsText: string | null;
@@ -86,8 +94,11 @@ interface JobContext {
   seniorityLevel: string | null;
 }
 
-interface ScoringResult {
+export interface ScoringResult {
   extraction: {
+    full_name: string | null;
+    email: string | null;
+    phone: string | null;
     skills: string[];
     experience_years: number | null;
     education: string[];
@@ -151,7 +162,7 @@ CV DO CANDIDATO (texto extraído do PDF):
 ${cvText.slice(0, 12000)}
 """
 
-Extrai os dados do CV e calcula o score de compatibilidade com a vaga. "reasoning" deve ter 2-4 frases em português.
+Extrai os dados do CV (incluindo nome completo, email e telefone se estiverem presentes no texto — caso contrário usa null, não inventes) e calcula o score de compatibilidade com a vaga. "reasoning" deve ter 2-4 frases em português.
 
 Identifica também red flags claramente presentes no CV — ex: gaps de emprego não explicados, inconsistências entre datas ou cargos, sobrequalificação significativa para o nível da vaga, mudanças de carreira frequentes sem explicação. Não inventes red flags que não estejam suportadas pelo texto; se não houver nenhuma, devolve uma lista vazia. "description" deve ser 1-2 frases em português.`,
       },
@@ -165,11 +176,9 @@ Identifica também red flags claramente presentes no CV — ex: gaps de emprego 
   return JSON.parse(textBlock.text) as ScoringResult;
 }
 
-export async function scoreApplication(
-  applicationId: string,
-  jobId: string,
-  cvBytes: Uint8Array
-) {
+export async function loadJobContext(
+  jobId: string
+): Promise<JobContext | null> {
   const admin = createAdminClient();
 
   const { data: job } = await admin
@@ -180,14 +189,13 @@ export async function scoreApplication(
     .eq("id", jobId)
     .single();
 
-  if (!job) return;
+  if (!job) return null;
 
   const translation =
-    job.job_translations.find(
-      (t: { locale: string }) => t.locale === "pt"
-    ) ?? job.job_translations[0];
+    job.job_translations.find((t: { locale: string }) => t.locale === "pt") ??
+    job.job_translations[0];
 
-  const jobContext: JobContext = {
+  return {
     title: translation?.title ?? "",
     description: translation?.description ?? null,
     requirementsText: translation?.requirements_text ?? null,
@@ -196,11 +204,26 @@ export async function scoreApplication(
       : [],
     seniorityLevel: job.seniority_level,
   };
+}
 
+export async function extractAndScoreCv(
+  cvBytes: Uint8Array,
+  job: JobContext
+): Promise<{ result: ScoringResult; cvText: string }> {
   const cvText = await extractPdfText(cvBytes);
-  if (!cvText.trim()) return;
+  if (!cvText.trim()) {
+    throw new Error("CV vazio ou ilegível.");
+  }
+  const result = await callClaudeForScoring(cvText, job);
+  return { result, cvText };
+}
 
-  const result = await callClaudeForScoring(cvText, jobContext);
+export async function writeScoringResult(
+  applicationId: string,
+  result: ScoringResult,
+  cvText: string
+) {
+  const admin = createAdminClient();
 
   await admin.from("cv_extractions").insert({
     application_id: applicationId,
@@ -236,4 +259,31 @@ export async function scoreApplication(
       }))
     );
   }
+}
+
+export async function ensureCvBucket(
+  admin: ReturnType<typeof createAdminClient>
+) {
+  const { data: bucket } = await admin.storage.getBucket(CV_BUCKET);
+  if (!bucket) {
+    await admin.storage.createBucket(CV_BUCKET, { public: false });
+  }
+}
+
+export async function scoreApplication(
+  applicationId: string,
+  jobId: string,
+  cvBytes: Uint8Array
+) {
+  const job = await loadJobContext(jobId);
+  if (!job) return;
+
+  let scored: { result: ScoringResult; cvText: string };
+  try {
+    scored = await extractAndScoreCv(cvBytes, job);
+  } catch {
+    return;
+  }
+
+  await writeScoringResult(applicationId, scored.result, scored.cvText);
 }

@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
 import { FeedbackComposer } from "./feedback-composer";
 import { ReportSection } from "./report-section";
+import { SourcedCvUpload } from "./sourced-cv-upload";
 
 const STAGE_ORDER = [
   "received",
@@ -294,6 +295,8 @@ export default async function JobDetailPage({
             </details>
           )}
         </div>
+
+        <SourcedCvUpload jobId={job.id} />
 
         {summaryRows.length > 0 && (
           <Card className="mt-6 overflow-x-auto px-5 py-4">

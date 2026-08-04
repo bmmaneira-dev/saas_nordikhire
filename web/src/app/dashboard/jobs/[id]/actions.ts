@@ -20,6 +20,13 @@ import {
   generateFeedbackDraftMessage,
   type FeedbackDraftType,
 } from "@/lib/feedback-messages";
+import {
+  loadJobContext,
+  extractAndScoreCv,
+  writeScoringResult,
+  ensureCvBucket,
+  CV_BUCKET,
+} from "@/lib/cv-scoring";
 
 const VALID_TEST_CATEGORIES: TestCategory[] = ["technical", "behavioral", "psychometric"];
 
@@ -422,4 +429,137 @@ export async function generateFeedbackDraft(
         (err instanceof Error ? err.message : String(err)),
     };
   }
+}
+
+// Permite ao recrutador carregar CVs que já tem (ex: sourcing directo, banco
+// de talentos externo) e passá-los pelo mesmo pipeline de IA das
+// candidaturas normais, sem esperar que o candidato se candidate pelo site.
+// Nome e email são extraídos do próprio CV — se não conseguirmos identificar
+// um email, o ficheiro é ignorado (não há forma de criar/ligar um candidato).
+export async function uploadSourcedCv(jobId: string, formData: FormData) {
+  const appUser = await getCurrentAppUser();
+  if (!appUser) redirect("/login");
+
+  const file = formData.get("cv") as File | null;
+  const fileName = file?.name ?? "ficheiro";
+
+  if (!file || file.size === 0) {
+    return { fileName, error: "Ficheiro vazio." };
+  }
+  if (file.type !== "application/pdf") {
+    return { fileName, error: "Só são aceites ficheiros PDF." };
+  }
+
+  const job = await loadJobContext(jobId);
+  if (!job) {
+    return { fileName, error: "Vaga não encontrada." };
+  }
+
+  const cvBytes = new Uint8Array(await file.arrayBuffer());
+
+  let scored;
+  try {
+    scored = await extractAndScoreCv(cvBytes, job);
+  } catch (err) {
+    return {
+      fileName,
+      error:
+        "Erro ao processar o CV: " +
+        (err instanceof Error ? err.message : String(err)),
+    };
+  }
+
+  const { email, full_name } = scored.result.extraction;
+  if (!email) {
+    return {
+      fileName,
+      error: "Não foi possível identificar um email no CV — ficheiro ignorado.",
+    };
+  }
+
+  const admin = createAdminClient();
+
+  const { data: existingCandidate } = await admin
+    .from("candidates")
+    .select("id, full_name")
+    .eq("email", email)
+    .maybeSingle();
+
+  let candidateId = existingCandidate?.id as string | undefined;
+  const candidateName = existingCandidate?.full_name ?? full_name ?? fileName;
+
+  if (!candidateId) {
+    const { data: newCandidate, error: candidateError } = await admin
+      .from("candidates")
+      .insert({
+        full_name: full_name ?? fileName.replace(/\.pdf$/i, ""),
+        email,
+        phone: scored.result.extraction.phone,
+        consent_data_processing: false,
+      })
+      .select("id")
+      .single();
+
+    if (candidateError || !newCandidate) {
+      return {
+        fileName,
+        error: "Erro ao criar candidato: " + candidateError?.message,
+      };
+    }
+    candidateId = newCandidate.id;
+  }
+
+  const { data: application, error: applicationError } = await admin
+    .from("applications")
+    .insert({
+      company_id: appUser.company_id,
+      job_id: jobId,
+      candidate_id: candidateId,
+      source: "sourced",
+      status: "received",
+    })
+    .select("id")
+    .single();
+
+  if (applicationError || !application) {
+    if (applicationError?.code === "23505") {
+      return {
+        fileName,
+        skipped: true,
+        candidateName,
+        reason: "Este candidato já tem uma candidatura a esta vaga.",
+      };
+    }
+    return {
+      fileName,
+      error: "Erro ao criar candidatura: " + applicationError?.message,
+    };
+  }
+
+  try {
+    await ensureCvBucket(admin);
+    const path = `${appUser.company_id}/${jobId}/${candidateId}-${fileName}`;
+    const { error: uploadError } = await admin.storage
+      .from(CV_BUCKET)
+      .upload(path, cvBytes, { upsert: true, contentType: "application/pdf" });
+    if (!uploadError) {
+      await admin
+        .from("applications")
+        .update({ cv_file_url: path })
+        .eq("id", application.id);
+    }
+  } catch {
+    // Guardar o ficheiro é best-effort; o scoring já não depende disto.
+  }
+
+  await writeScoringResult(application.id, scored.result, scored.cvText);
+
+  revalidatePath(`/dashboard/jobs/${jobId}`);
+
+  return {
+    fileName,
+    success: true,
+    candidateName,
+    score: Math.round(scored.result.score.overall_score),
+  };
 }
