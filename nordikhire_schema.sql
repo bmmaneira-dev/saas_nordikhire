@@ -226,6 +226,10 @@ create table applications (
     candidate_id        uuid not null references candidates(id) on delete cascade,
     source              text not null,               -- 'site' | 'link' | 'qrcode' | 'whatsapp' | 'telegram'
     cv_file_url         text,                         -- storage do Supabase
+    video_url           text,                         -- vídeo de apresentação opcional
+                                                        -- para esta candidatura específica
+                                                        -- (storage do Supabase, não é vídeo
+                                                        -- de perfil global do candidato)
     status              text not null default 'received',
     -- received -> screening -> scored -> shortlisted -> interview -> test ->
     -- offer -> hired | rejected | withdrawn

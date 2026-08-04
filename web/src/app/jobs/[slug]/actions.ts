@@ -4,12 +4,49 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { scoreApplication } from "@/lib/cv-scoring";
 
 const CV_BUCKET = "cvs";
+const VIDEO_BUCKET = "application-videos";
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50MB — tecto do projecto Supabase
 
 async function ensureCvBucket(admin: ReturnType<typeof createAdminClient>) {
   const { data: bucket } = await admin.storage.getBucket(CV_BUCKET);
   if (!bucket) {
     await admin.storage.createBucket(CV_BUCKET, { public: false });
   }
+}
+
+async function ensureVideoBucket(admin: ReturnType<typeof createAdminClient>) {
+  const { data: bucket } = await admin.storage.getBucket(VIDEO_BUCKET);
+  if (!bucket) {
+    await admin.storage.createBucket(VIDEO_BUCKET, {
+      public: false,
+      fileSizeLimit: MAX_VIDEO_BYTES,
+    });
+  }
+}
+
+// O vídeo vai directamente do browser para o Supabase Storage via signed
+// upload URL — nunca passa pelo corpo do pedido a esta Server Action, que
+// tem um limite de tamanho muito abaixo do de um ficheiro de vídeo.
+export async function createVideoUploadTicket(
+  jobId: string,
+  companyId: string,
+  fileName: string
+) {
+  const admin = createAdminClient();
+  await ensureVideoBucket(admin);
+
+  const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
+  const path = `${companyId}/${jobId}/${crypto.randomUUID()}-${safeName}`;
+
+  const { data, error } = await admin.storage
+    .from(VIDEO_BUCKET)
+    .createSignedUploadUrl(path);
+
+  if (error || !data) {
+    return { error: "Erro ao preparar o envio do vídeo: " + error?.message };
+  }
+
+  return { path: data.path, token: data.token };
 }
 
 export async function applyToJob(
@@ -23,6 +60,7 @@ export async function applyToJob(
   const phone = String(formData.get("phone") ?? "").trim() || null;
   const consent = formData.get("consent") === "on";
   const cvFile = formData.get("cv") as File | null;
+  const videoPath = String(formData.get("videoUrl") ?? "").trim() || null;
 
   if (!fullName || !email) {
     return { error: "Nome e email são obrigatórios." };
@@ -92,6 +130,7 @@ export async function applyToJob(
       candidate_id: candidateId,
       source: "site",
       cv_file_url: cvFileUrl,
+      video_url: videoPath,
       status: "received",
     })
     .select("id")

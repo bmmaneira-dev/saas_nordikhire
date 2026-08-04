@@ -42,6 +42,7 @@ const STAGE_LABELS: Record<string, string> = {
   hired: "Contratado",
 };
 const TERMINAL_STATUSES = ["hired", "rejected", "withdrawn"];
+const VIDEO_BUCKET = "application-videos";
 
 function nextStageLabel(current: string): string | null {
   const idx = STAGE_ORDER.indexOf(current);
@@ -163,10 +164,23 @@ export default async function JobDetailPage({
   const { data: applications } = await admin
     .from("applications")
     .select(
-      "id, status, score_total, applied_at, candidates(full_name, email, phone), scoring_results(overall_score, breakdown, ai_reasoning, created_at), ai_interviews(id, status, created_at), candidate_feedback(feedback_type, content, sent_at, created_at), red_flags(flag_type, severity, description), test_assignments(id, test_name, status, result_score, result_raw, assigned_at), candidate_development_reports(strengths, technical_gaps, behavioral_gaps, training_recommendations, overall_summary, generated_at)"
+      "id, status, score_total, applied_at, video_url, candidates(full_name, email, phone), scoring_results(overall_score, breakdown, ai_reasoning, created_at), ai_interviews(id, status, created_at), candidate_feedback(feedback_type, content, sent_at, created_at), red_flags(flag_type, severity, description), test_assignments(id, test_name, status, result_score, result_raw, assigned_at), candidate_development_reports(strengths, technical_gaps, behavioral_gaps, training_recommendations, overall_summary, generated_at)"
     )
     .eq("job_id", id)
     .order("score_total", { ascending: false, nullsFirst: false });
+
+  const videoPaths = (applications ?? [])
+    .map((a) => a.video_url)
+    .filter((p): p is string => Boolean(p));
+  const videoUrlMap = new Map<string, string>();
+  if (videoPaths.length > 0) {
+    const { data: signedUrls } = await admin.storage
+      .from(VIDEO_BUCKET)
+      .createSignedUrls(videoPaths, 3600);
+    signedUrls?.forEach((s) => {
+      if (s.signedUrl) videoUrlMap.set(s.path ?? "", s.signedUrl);
+    });
+  }
 
   const summaryRows = (applications ?? []).map((application) => {
     const candidate = toOne(application.candidates);
@@ -451,6 +465,19 @@ export default async function JobDetailPage({
                         {scoring.ai_reasoning}
                       </p>
                     )}
+                  </div>
+                )}
+
+                {application.video_url && videoUrlMap.get(application.video_url) && (
+                  <div className="mt-3 border-t border-surface-border pt-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Vídeo de apresentação
+                    </p>
+                    <video
+                      controls
+                      src={videoUrlMap.get(application.video_url)}
+                      className="mt-2 w-full max-w-sm rounded-lg"
+                    />
                   </div>
                 )}
 

@@ -14,6 +14,7 @@ interface FeedbackRow {
 }
 
 const TERMINAL_STATUSES = ["hired", "rejected", "withdrawn"];
+const VIDEO_BUCKET = "application-videos";
 
 export default async function CandidateApplicationsPage() {
   const candidate = await getCurrentCandidate();
@@ -23,10 +24,23 @@ export default async function CandidateApplicationsPage() {
   const { data: applications } = await admin
     .from("applications")
     .select(
-      "id, status, applied_at, stage_updated_at, jobs(job_translations(title, locale), companies(name)), candidate_feedback(content, feedback_type, created_at)"
+      "id, status, applied_at, stage_updated_at, video_url, jobs(job_translations(title, locale), companies(name)), candidate_feedback(content, feedback_type, created_at)"
     )
     .eq("candidate_id", candidate.id)
     .order("applied_at", { ascending: false });
+
+  const videoPaths = (applications ?? [])
+    .map((a) => a.video_url)
+    .filter((p): p is string => Boolean(p));
+  const videoUrlMap = new Map<string, string>();
+  if (videoPaths.length > 0) {
+    const { data: signedUrls } = await admin.storage
+      .from(VIDEO_BUCKET)
+      .createSignedUrls(videoPaths, 3600);
+    signedUrls?.forEach((s) => {
+      if (s.signedUrl) videoUrlMap.set(s.path ?? "", s.signedUrl);
+    });
+  }
 
   return (
     <>
@@ -82,6 +96,19 @@ export default async function CandidateApplicationsPage() {
                     application.stage_updated_at
                   ).toLocaleDateString("pt-PT")}`}
               </p>
+
+              {application.video_url && videoUrlMap.get(application.video_url) && (
+                <div className="mt-3 border-t border-surface-border pt-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    O teu vídeo de apresentação
+                  </p>
+                  <video
+                    controls
+                    src={videoUrlMap.get(application.video_url)}
+                    className="mt-2 w-full max-w-sm rounded-lg"
+                  />
+                </div>
+              )}
 
               {feedbackHistory.length > 0 && (
                 <div className="mt-3 border-t border-surface-border pt-3">
