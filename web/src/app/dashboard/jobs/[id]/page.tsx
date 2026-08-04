@@ -25,6 +25,7 @@ import { Select } from "@/components/ui/field";
 import { FeedbackComposer } from "./feedback-composer";
 import { ReportSection } from "./report-section";
 import { SourcedCvUpload } from "./sourced-cv-upload";
+import { SharePanel } from "./share-panel";
 
 const STAGE_ORDER = [
   "received",
@@ -249,6 +250,10 @@ export default async function JobDetailPage({
         <p className="mt-1 text-sm text-muted-foreground">
           {applications?.length ?? 0} candidatura(s)
         </p>
+
+        {job.public_slug && (
+          <SharePanel slug={job.public_slug} jobTitle={translation?.title ?? ""} />
+        )}
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {job.job_translations.map(
