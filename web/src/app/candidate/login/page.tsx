@@ -14,6 +14,7 @@ export default function CandidateLoginPage() {
     <AuthShell
       title="Entrar como candidato"
       subtitle="Acede às tuas ferramentas de carreira."
+      variant="candidate"
       footer={
         <>
           Ainda não tens conta?{" "}
@@ -33,6 +34,12 @@ export default function CandidateLoginPage() {
         <Field label="Password">
           <PasswordInput name="password" required />
         </Field>
+        <Link
+          href="/candidate/forgot-password"
+          className="-mt-2 self-end text-xs font-medium text-primary underline"
+        >
+          Esqueci-me da password
+        </Link>
 
         {state?.error && <p className="text-sm text-danger">{state.error}</p>}
 

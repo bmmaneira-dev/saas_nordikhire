@@ -14,6 +14,7 @@ export default function CandidateSignupPage() {
     <AuthShell
       title="Criar conta de candidato"
       subtitle="Acede às ferramentas de carreira do NordikHire — independente de qualquer candidatura."
+      variant="candidate"
       footer={
         <>
           Já tens conta?{" "}

@@ -30,6 +30,12 @@ export default function LoginPage() {
         <Field label="Password">
           <PasswordInput name="password" required />
         </Field>
+        <Link
+          href="/forgot-password"
+          className="-mt-2 self-end text-xs font-medium text-primary underline"
+        >
+          Esqueci-me da password
+        </Link>
 
         {state?.error && <p className="text-sm text-danger">{state.error}</p>}
 
