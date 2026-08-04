@@ -10,7 +10,6 @@ import {
   sendFeedback,
   assignTest,
   translateJob,
-  generateReport,
 } from "./actions";
 import { SUPPORTED_LOCALES, LOCALE_LABELS } from "@/lib/translate-job";
 import {
@@ -24,6 +23,7 @@ import { Badge, statusVariant } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
 import { FeedbackComposer } from "./feedback-composer";
+import { ReportSection } from "./report-section";
 
 const STAGE_ORDER = [
   "received",
@@ -608,92 +608,12 @@ export default async function JobDetailPage({
                   )}
                 </div>
 
-                <div className="mt-3 border-t border-surface-border pt-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Relatório de desenvolvimento
-                    </p>
-                    {hasEvaluationData ? (
-                      <form action={generateReport.bind(null, application.id, job.id)}>
-                        <Button type="submit" variant="ghost" size="sm">
-                          {devReport ? "Actualizar" : "Gerar relatório"}
-                        </Button>
-                      </form>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        Sem dados suficientes
-                      </span>
-                    )}
-                  </div>
-                  {!hasEvaluationData && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Precisa de pelo menos um score de CV, red flags, uma entrevista
-                      concluída ou um teste concluído antes de gerar um relatório.
-                    </p>
-                  )}
-                  {devReport && (
-                    <details className="mt-1">
-                      <summary className="cursor-pointer list-none text-xs font-medium text-primary underline">
-                        Ver relatório
-                      </summary>
-                      {devReport.overall_summary && (
-                        <p className="mt-2 text-sm text-foreground/90">
-                          {devReport.overall_summary}
-                        </p>
-                      )}
-                      {(devReport.strengths?.length ?? 0) > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs font-medium text-success">
-                            Pontos fortes
-                          </p>
-                          <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
-                            {devReport.strengths!.map((s, i) => (
-                              <li key={i}>• {s}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {(devReport.technical_gaps?.length ?? 0) > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs font-medium text-warning">
-                            Lacunas técnicas
-                          </p>
-                          <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
-                            {devReport.technical_gaps!.map((s, i) => (
-                              <li key={i}>• {s}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {(devReport.behavioral_gaps?.length ?? 0) > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs font-medium text-warning">
-                            Lacunas comportamentais
-                          </p>
-                          <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
-                            {devReport.behavioral_gaps!.map((s, i) => (
-                              <li key={i}>• {s}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      {(devReport.training_recommendations?.length ?? 0) > 0 && (
-                        <div className="mt-3">
-                          <p className="text-xs font-medium text-primary">
-                            Recomendações de formação
-                          </p>
-                          <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
-                            {devReport.training_recommendations!.map((r, i) => (
-                              <li key={i}>
-                                • {r.suggested_topic} ({r.resource_type}) — {r.gap}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </details>
-                  )}
-                </div>
+                <ReportSection
+                  applicationId={application.id}
+                  jobId={job.id}
+                  devReport={devReport}
+                  hasEvaluationData={hasEvaluationData}
+                />
 
                 {!isTerminal && (
                   <div className="mt-3 flex flex-col gap-3 border-t border-surface-border pt-3">
