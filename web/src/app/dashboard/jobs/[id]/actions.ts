@@ -15,6 +15,7 @@ import {
   SUPPORTED_LOCALES,
   type Locale,
 } from "@/lib/translate-job";
+import { generateDevelopmentReport } from "@/lib/development-report";
 
 const VALID_TEST_CATEGORIES: TestCategory[] = ["technical", "behavioral", "psychometric"];
 
@@ -230,6 +231,104 @@ export async function translateJob(jobId: string, formData: FormData) {
     requirements_text: translated.requirements_text,
     is_machine_translated: true,
   });
+
+  revalidatePath(`/dashboard/jobs/${jobId}`);
+}
+
+export async function generateReport(applicationId: string, jobId: string) {
+  const appUser = await getCurrentAppUser();
+  if (!appUser) redirect("/login");
+  const admin = createAdminClient();
+
+  const { data: application } = await admin
+    .from("applications")
+    .select(
+      "id, candidates(full_name), scoring_results(overall_score, breakdown, ai_reasoning, created_at), red_flags(flag_type, severity, description), ai_interviews(ai_summary, ai_evaluation, status, completed_at), test_assignments(test_name, status, result_score, result_raw)"
+    )
+    .eq("id", applicationId)
+    .eq("company_id", appUser.company_id)
+    .maybeSingle();
+  if (!application) return;
+
+  const { data: job } = await admin
+    .from("jobs")
+    .select("job_translations(title, locale)")
+    .eq("id", jobId)
+    .single();
+  if (!job) return;
+
+  const jobTitle =
+    job.job_translations.find((t: { locale: string }) => t.locale === "pt")
+      ?.title ?? job.job_translations[0]?.title ?? "";
+
+  const candidate = Array.isArray(application.candidates)
+    ? application.candidates[0]
+    : application.candidates;
+
+  const scoringRows = Array.isArray(application.scoring_results)
+    ? application.scoring_results
+    : application.scoring_results
+      ? [application.scoring_results]
+      : [];
+  const scoring = [...scoringRows].sort((a, b) =>
+    a.created_at < b.created_at ? 1 : -1
+  )[0];
+
+  const redFlags = Array.isArray(application.red_flags)
+    ? application.red_flags
+    : application.red_flags
+      ? [application.red_flags]
+      : [];
+
+  const interviewRows = Array.isArray(application.ai_interviews)
+    ? application.ai_interviews
+    : application.ai_interviews
+      ? [application.ai_interviews]
+      : [];
+  const interview = interviewRows.find((i) => i.status === "completed");
+
+  const testRows = Array.isArray(application.test_assignments)
+    ? application.test_assignments
+    : application.test_assignments
+      ? [application.test_assignments]
+      : [];
+  const completedTests = testRows.filter((t) => t.status === "completed");
+
+  const report = await generateDevelopmentReport({
+    jobTitle,
+    candidateName: candidate?.full_name ?? "Candidato",
+    cvScore: scoring?.overall_score ?? null,
+    cvBreakdown: scoring?.breakdown ?? null,
+    cvReasoning: scoring?.ai_reasoning ?? null,
+    redFlags: redFlags.map((f) => ({
+      flag_type: f.flag_type,
+      severity: f.severity,
+      description: f.description,
+    })),
+    interviewSummary: interview?.ai_summary ?? null,
+    interviewEvaluation: interview?.ai_evaluation ?? null,
+    testResults: completedTests.map((t) => ({
+      test_name: t.test_name,
+      category: t.result_raw?.category ?? null,
+      score: t.result_score,
+      summary: t.result_raw?.overall_summary ?? null,
+      recommendation: t.result_raw?.recommendation ?? null,
+    })),
+  });
+
+  await admin.from("candidate_development_reports").upsert(
+    {
+      application_id: applicationId,
+      strengths: report.strengths,
+      technical_gaps: report.technical_gaps,
+      behavioral_gaps: report.behavioral_gaps,
+      training_recommendations: report.training_recommendations,
+      overall_summary: report.overall_summary,
+      ai_model: "claude-haiku-4-5",
+      generated_at: new Date().toISOString(),
+    },
+    { onConflict: "application_id" }
+  );
 
   revalidatePath(`/dashboard/jobs/${jobId}`);
 }

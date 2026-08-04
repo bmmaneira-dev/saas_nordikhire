@@ -10,6 +10,7 @@ import {
   sendFeedback,
   assignTest,
   translateJob,
+  generateReport,
 } from "./actions";
 import { SUPPORTED_LOCALES, LOCALE_LABELS } from "@/lib/translate-job";
 import {
@@ -118,6 +119,21 @@ const RECOMMENDATION_VARIANT: Record<TestRecommendation, "success" | "warning" |
   not_applicable: "neutral",
 };
 
+interface TrainingRecommendationRow {
+  gap: string;
+  suggested_topic: string;
+  resource_type: string;
+}
+
+interface DevReportRow {
+  strengths: string[] | null;
+  technical_gaps: string[] | null;
+  behavioral_gaps: string[] | null;
+  training_recommendations: TrainingRecommendationRow[] | null;
+  overall_summary: string | null;
+  generated_at: string;
+}
+
 export default async function JobDetailPage({
   params,
 }: {
@@ -148,10 +164,50 @@ export default async function JobDetailPage({
   const { data: applications } = await admin
     .from("applications")
     .select(
-      "id, status, score_total, applied_at, candidates(full_name, email, phone), scoring_results(overall_score, breakdown, ai_reasoning, created_at), ai_interviews(id, status, created_at), candidate_feedback(feedback_type, content, sent_at, created_at), red_flags(flag_type, severity, description), test_assignments(id, test_name, status, result_score, result_raw, assigned_at)"
+      "id, status, score_total, applied_at, candidates(full_name, email, phone), scoring_results(overall_score, breakdown, ai_reasoning, created_at), ai_interviews(id, status, created_at), candidate_feedback(feedback_type, content, sent_at, created_at), red_flags(flag_type, severity, description), test_assignments(id, test_name, status, result_score, result_raw, assigned_at), candidate_development_reports(strengths, technical_gaps, behavioral_gaps, training_recommendations, overall_summary, generated_at)"
     )
     .eq("job_id", id)
     .order("score_total", { ascending: false, nullsFirst: false });
+
+  const summaryRows = (applications ?? []).map((application) => {
+    const candidate = toOne(application.candidates);
+
+    const interviewRows: InterviewRow[] = Array.isArray(application.ai_interviews)
+      ? application.ai_interviews
+      : application.ai_interviews
+        ? [application.ai_interviews as InterviewRow]
+        : [];
+    const interview = [...interviewRows].sort((a, b) =>
+      a.created_at < b.created_at ? 1 : -1
+    )[0];
+
+    const redFlagRows: RedFlagRow[] = Array.isArray(application.red_flags)
+      ? application.red_flags
+      : application.red_flags
+        ? [application.red_flags as RedFlagRow]
+        : [];
+
+    const testRows: TestAssignmentRow[] = Array.isArray(application.test_assignments)
+      ? application.test_assignments
+      : application.test_assignments
+        ? [application.test_assignments as TestAssignmentRow]
+        : [];
+    const bestTestScore = testRows.reduce<number | null>((best, t) => {
+      if (t.result_score == null) return best;
+      return best == null ? t.result_score : Math.max(best, t.result_score);
+    }, null);
+
+    return {
+      id: application.id,
+      name: candidate?.full_name ?? "-",
+      score: application.score_total,
+      status: application.status,
+      interviewStatus: interview?.status ?? null,
+      bestTestScore,
+      redFlagCount: redFlagRows.length,
+      highRedFlagCount: redFlagRows.filter((f) => f.severity === "high").length,
+    };
+  });
 
   return (
     <>
@@ -227,6 +283,61 @@ export default async function JobDetailPage({
           )}
         </div>
 
+        {summaryRows.length > 0 && (
+          <Card className="mt-6 overflow-x-auto px-5 py-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Resumo comparativo
+            </p>
+            <table className="mt-2 w-full min-w-[560px] text-left text-sm">
+              <thead>
+                <tr className="text-xs text-muted-foreground">
+                  <th className="py-1.5 pr-3 font-medium">Candidato</th>
+                  <th className="py-1.5 pr-3 font-medium">Score</th>
+                  <th className="py-1.5 pr-3 font-medium">Estado</th>
+                  <th className="py-1.5 pr-3 font-medium">Entrevista</th>
+                  <th className="py-1.5 pr-3 font-medium">Melhor teste</th>
+                  <th className="py-1.5 font-medium">Red flags</th>
+                </tr>
+              </thead>
+              <tbody>
+                {summaryRows.map((row) => (
+                  <tr key={row.id} className="border-t border-surface-border">
+                    <td className="py-1.5 pr-3">
+                      <Link
+                        href={`#candidate-${row.id}`}
+                        className="font-medium text-primary underline"
+                      >
+                        {row.name}
+                      </Link>
+                    </td>
+                    <td className="py-1.5 pr-3">
+                      {row.score != null ? Math.round(row.score) : "-"}
+                    </td>
+                    <td className="py-1.5 pr-3">
+                      <Badge variant={statusVariant(row.status)}>{row.status}</Badge>
+                    </td>
+                    <td className="py-1.5 pr-3 text-muted-foreground">
+                      {row.interviewStatus ?? "-"}
+                    </td>
+                    <td className="py-1.5 pr-3 text-muted-foreground">
+                      {row.bestTestScore != null ? Math.round(row.bestTestScore) : "-"}
+                    </td>
+                    <td className="py-1.5">
+                      {row.redFlagCount > 0 ? (
+                        <Badge variant={row.highRedFlagCount > 0 ? "danger" : "warning"}>
+                          {row.redFlagCount}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        )}
+
         <ul className="mt-6 flex flex-col gap-4">
           {applications?.length === 0 && (
             <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
@@ -288,9 +399,16 @@ export default async function JobDetailPage({
               a.assigned_at < b.assigned_at ? 1 : -1
             );
 
+            const devReport = toOne(
+              application.candidate_development_reports as
+                | DevReportRow
+                | DevReportRow[]
+                | null
+            );
+
             return (
-              <li key={application.id}>
-              <Card className="px-5 py-4">
+              <li key={application.id} id={`candidate-${application.id}`}>
+              <Card className="scroll-mt-6 px-5 py-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-medium">{candidate?.full_name}</p>
@@ -456,6 +574,81 @@ export default async function JobDetailPage({
                         Iniciar entrevista com IA
                       </Button>
                     </form>
+                  )}
+                </div>
+
+                <div className="mt-3 border-t border-surface-border pt-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Relatório de desenvolvimento
+                    </p>
+                    <form action={generateReport.bind(null, application.id, job.id)}>
+                      <Button type="submit" variant="ghost" size="sm">
+                        {devReport ? "Actualizar" : "Gerar relatório"}
+                      </Button>
+                    </form>
+                  </div>
+                  {devReport && (
+                    <details className="mt-1">
+                      <summary className="cursor-pointer list-none text-xs font-medium text-primary underline">
+                        Ver relatório
+                      </summary>
+                      {devReport.overall_summary && (
+                        <p className="mt-2 text-sm text-foreground/90">
+                          {devReport.overall_summary}
+                        </p>
+                      )}
+                      {(devReport.strengths?.length ?? 0) > 0 && (
+                        <div className="mt-3">
+                          <p className="text-xs font-medium text-success">
+                            Pontos fortes
+                          </p>
+                          <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
+                            {devReport.strengths!.map((s, i) => (
+                              <li key={i}>• {s}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {(devReport.technical_gaps?.length ?? 0) > 0 && (
+                        <div className="mt-3">
+                          <p className="text-xs font-medium text-warning">
+                            Lacunas técnicas
+                          </p>
+                          <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
+                            {devReport.technical_gaps!.map((s, i) => (
+                              <li key={i}>• {s}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {(devReport.behavioral_gaps?.length ?? 0) > 0 && (
+                        <div className="mt-3">
+                          <p className="text-xs font-medium text-warning">
+                            Lacunas comportamentais
+                          </p>
+                          <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
+                            {devReport.behavioral_gaps!.map((s, i) => (
+                              <li key={i}>• {s}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {(devReport.training_recommendations?.length ?? 0) > 0 && (
+                        <div className="mt-3">
+                          <p className="text-xs font-medium text-primary">
+                            Recomendações de formação
+                          </p>
+                          <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
+                            {devReport.training_recommendations!.map((r, i) => (
+                              <li key={i}>
+                                • {r.suggested_topic} ({r.resource_type}) — {r.gap}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </details>
                   )}
                 </div>
 
