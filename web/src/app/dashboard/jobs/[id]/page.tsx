@@ -418,6 +418,12 @@ export default async function JobDetailPage({
                 | null
             );
 
+            const hasEvaluationData =
+              scoring != null ||
+              redFlags.length > 0 ||
+              interview?.status === "completed" ||
+              sortedTests.some((t) => t.status === "completed");
+
             return (
               <li key={application.id} id={`candidate-${application.id}`}>
               <Card className="scroll-mt-6 px-5 py-4">
@@ -607,12 +613,24 @@ export default async function JobDetailPage({
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       Relatório de desenvolvimento
                     </p>
-                    <form action={generateReport.bind(null, application.id, job.id)}>
-                      <Button type="submit" variant="ghost" size="sm">
-                        {devReport ? "Actualizar" : "Gerar relatório"}
-                      </Button>
-                    </form>
+                    {hasEvaluationData ? (
+                      <form action={generateReport.bind(null, application.id, job.id)}>
+                        <Button type="submit" variant="ghost" size="sm">
+                          {devReport ? "Actualizar" : "Gerar relatório"}
+                        </Button>
+                      </form>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">
+                        Sem dados suficientes
+                      </span>
+                    )}
                   </div>
+                  {!hasEvaluationData && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Precisa de pelo menos um score de CV, red flags, uma entrevista
+                      concluída ou um teste concluído antes de gerar um relatório.
+                    </p>
+                  )}
                   {devReport && (
                     <details className="mt-1">
                       <summary className="cursor-pointer list-none text-xs font-medium text-primary underline">
