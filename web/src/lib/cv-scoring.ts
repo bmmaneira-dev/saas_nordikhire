@@ -15,6 +15,18 @@ PDFParse.setWorker(getPath());
 const MODEL = "claude-haiku-4-5";
 
 export const CV_BUCKET = "cvs";
+export const MAX_CV_BYTES = 10 * 1024 * 1024; // 10MB — CVs razoáveis ficam bem abaixo disto
+const PDF_PARSE_TIMEOUT_MS = 15000;
+
+// O tipo declarado pelo browser (File.type) é controlado pelo atacante —
+// confirmamos que o ficheiro é mesmo um PDF pelos bytes iniciais ("%PDF-")
+// antes de o aceitarmos, guardarmos, ou passarmos ao parser.
+export function isPdfHeader(bytes: Uint8Array): boolean {
+  const header = Array.from(bytes.slice(0, 5))
+    .map((b) => String.fromCharCode(b))
+    .join("");
+  return header === "%PDF-";
+}
 
 const SCORING_SCHEMA = {
   type: "object",
@@ -125,9 +137,27 @@ export interface ScoringResult {
 }
 
 async function extractPdfText(data: Uint8Array): Promise<string> {
+  if (data.byteLength > MAX_CV_BYTES) {
+    throw new Error("Ficheiro demasiado grande.");
+  }
+  if (!isPdfHeader(data)) {
+    throw new Error("O ficheiro não é um PDF válido.");
+  }
+
   const parser = new PDFParse({ data });
   try {
-    const result = await parser.getText();
+    // Um PDF construído de forma maliciosa (streams comprimidos aninhados,
+    // etc.) pode gastar CPU/memória de forma desproporcional ao seu
+    // tamanho — um tecto de tempo evita que isso bloqueie o processo.
+    const result = await Promise.race([
+      parser.getText(),
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Tempo excedido ao processar o PDF.")),
+          PDF_PARSE_TIMEOUT_MS
+        )
+      ),
+    ]);
     return result.text;
   } finally {
     await parser.destroy();
@@ -285,7 +315,10 @@ export async function ensureCvBucket(
 ) {
   const { data: bucket } = await admin.storage.getBucket(CV_BUCKET);
   if (!bucket) {
-    await admin.storage.createBucket(CV_BUCKET, { public: false });
+    await admin.storage.createBucket(CV_BUCKET, {
+      public: false,
+      fileSizeLimit: MAX_CV_BYTES,
+    });
   }
 }
 

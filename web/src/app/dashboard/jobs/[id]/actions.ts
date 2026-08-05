@@ -26,6 +26,8 @@ import {
   extractAndScoreCv,
   writeScoringResult,
   ensureCvBucket,
+  isPdfHeader,
+  MAX_CV_BYTES,
   CV_BUCKET,
 } from "@/lib/cv-scoring";
 
@@ -475,8 +477,8 @@ export async function uploadSourcedCv(jobId: string, formData: FormData) {
   if (!file || file.size === 0) {
     return { fileName, error: "Ficheiro vazio." };
   }
-  if (file.type !== "application/pdf") {
-    return { fileName, error: "Só são aceites ficheiros PDF." };
+  if (file.size > MAX_CV_BYTES) {
+    return { fileName, error: "Ficheiro demasiado grande." };
   }
 
   const { allowed } = await checkRateLimit("upload_sourced_cv", appUser.company_id, {
@@ -493,6 +495,9 @@ export async function uploadSourcedCv(jobId: string, formData: FormData) {
   }
 
   const cvBytes = new Uint8Array(await file.arrayBuffer());
+  if (!isPdfHeader(cvBytes)) {
+    return { fileName, error: "Só são aceites ficheiros PDF." };
+  }
 
   let scored;
   try {

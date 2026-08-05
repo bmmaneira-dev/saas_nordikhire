@@ -1,19 +1,17 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import { scoreApplication } from "@/lib/cv-scoring";
+import {
+  scoreApplication,
+  ensureCvBucket,
+  isPdfHeader,
+  MAX_CV_BYTES,
+  CV_BUCKET,
+} from "@/lib/cv-scoring";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
-const CV_BUCKET = "cvs";
 const VIDEO_BUCKET = "application-videos";
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50MB — tecto do projecto Supabase
-
-async function ensureCvBucket(admin: ReturnType<typeof createAdminClient>) {
-  const { data: bucket } = await admin.storage.getBucket(CV_BUCKET);
-  if (!bucket) {
-    await admin.storage.createBucket(CV_BUCKET, { public: false });
-  }
-}
 
 async function ensureVideoBucket(admin: ReturnType<typeof createAdminClient>) {
   const { data: bucket } = await admin.storage.getBucket(VIDEO_BUCKET);
@@ -138,23 +136,28 @@ export async function applyToJob(
 
   let cvFileUrl: string | null = null;
   let cvBytes: Uint8Array | null = null;
-  if (cvFile && cvFile.size > 0) {
-    cvBytes = new Uint8Array(await cvFile.arrayBuffer());
-    try {
-      await ensureCvBucket(admin);
-      const safeName = cvFile.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
-      const path = `${companyId}/${jobId}/${candidateId}-${safeName}`;
-      const { error: uploadError } = await admin.storage
-        .from(CV_BUCKET)
-        .upload(path, cvBytes, {
-          upsert: true,
-          contentType: cvFile.type || "application/pdf",
-        });
-      if (!uploadError) {
-        cvFileUrl = path;
+  let cvIsValidPdf = false;
+  if (cvFile && cvFile.size > 0 && cvFile.size <= MAX_CV_BYTES) {
+    const bytes = new Uint8Array(await cvFile.arrayBuffer());
+    cvIsValidPdf = isPdfHeader(bytes);
+    if (cvIsValidPdf) {
+      cvBytes = bytes;
+      try {
+        await ensureCvBucket(admin);
+        const safeName = cvFile.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
+        const path = `${companyId}/${jobId}/${candidateId}-${safeName}`;
+        const { error: uploadError } = await admin.storage
+          .from(CV_BUCKET)
+          .upload(path, cvBytes, {
+            upsert: true,
+            contentType: "application/pdf",
+          });
+        if (!uploadError) {
+          cvFileUrl = path;
+        }
+      } catch {
+        // CV upload is best-effort; the application still goes through without it.
       }
-    } catch {
-      // CV upload is best-effort; the application still goes through without it.
     }
   }
 
@@ -181,7 +184,7 @@ export async function applyToJob(
     };
   }
 
-  if (cvBytes && cvFile?.type === "application/pdf") {
+  if (cvBytes && cvIsValidPdf) {
     // Awaited so the demo can show the score immediately after applying.
     // Best-effort: scoring failures should never block the application itself.
     try {
