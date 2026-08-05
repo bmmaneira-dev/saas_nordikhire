@@ -47,6 +47,26 @@ export default function SignupPage() {
           </Select>
         </Field>
 
+        <label className="flex items-start gap-2 text-sm text-foreground">
+          <input
+            type="checkbox"
+            name="consent"
+            required
+            className="mt-1 h-4 w-4 accent-primary"
+          />
+          <span>
+            Aceito os{" "}
+            <Link href="/legal/terms" className="text-primary underline" target="_blank">
+              Termos de Serviço
+            </Link>{" "}
+            e a{" "}
+            <Link href="/legal/privacy" className="text-primary underline" target="_blank">
+              Política de Privacidade
+            </Link>
+            .
+          </span>
+        </label>
+
         {state?.error && <p className="text-sm text-danger">{state.error}</p>}
 
         <Button type="submit" disabled={pending} className="mt-2 w-full">

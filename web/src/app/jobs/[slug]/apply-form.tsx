@@ -5,6 +5,7 @@ import { applyToJob, createVideoUploadTicket } from "./actions";
 import { createClient } from "@/lib/supabase/client";
 import { Field, Input } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const VIDEO_BUCKET = "application-videos";
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50MB
@@ -132,8 +133,11 @@ export function ApplyForm({
         />
         <span>
           Aceito o tratamento dos meus dados pessoais para efeitos deste
-          processo de recrutamento, conforme a Política de Protecção de
-          Dados.
+          processo de recrutamento, conforme a{" "}
+          <Link href="/legal/privacy" className="text-primary underline" target="_blank">
+            Política de Privacidade
+          </Link>
+          .
         </span>
       </label>
 

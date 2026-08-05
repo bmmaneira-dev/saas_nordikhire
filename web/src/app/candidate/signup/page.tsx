@@ -56,8 +56,15 @@ export default function CandidateSignupPage() {
             className="mt-1 h-4 w-4 accent-primary"
           />
           <span>
-            Aceito o tratamento dos meus dados pessoais conforme a Política de
-            Protecção de Dados.
+            Aceito os{" "}
+            <Link href="/legal/terms" className="text-primary underline" target="_blank">
+              Termos de Serviço
+            </Link>{" "}
+            e o tratamento dos meus dados pessoais conforme a{" "}
+            <Link href="/legal/privacy" className="text-primary underline" target="_blank">
+              Política de Privacidade
+            </Link>
+            .
           </span>
         </label>
 

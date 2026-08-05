@@ -26,12 +26,16 @@ export async function signup(_prevState: unknown, formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const locale = toLocale(String(formData.get("locale") ?? ""));
+  const consent = formData.get("consent") === "on";
 
   if (!companyName || !fullName || !email || !password) {
     return { error: "Preenche todos os campos." };
   }
   if (password.length < 8) {
     return { error: "A password deve ter pelo menos 8 caracteres." };
+  }
+  if (!consent) {
+    return { error: "Tens de aceitar os Termos de Serviço e a Política de Privacidade." };
   }
 
   const supabase = await createClient();
@@ -122,6 +126,8 @@ export async function signup(_prevState: unknown, formData: FormData) {
     role_id: role.id,
     full_name: fullName,
     email,
+    consent_data_processing: true,
+    consent_date: new Date().toISOString(),
   });
 
   if (userError) {
