@@ -106,6 +106,14 @@ export async function startInterview(applicationId: string) {
     throw new Error("Sem permissão para iniciar esta entrevista.");
   }
 
+  const { allowed } = await checkRateLimit("interview_start", appUser.company_id, {
+    maxAttempts: 30,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    throw new Error("Demasiadas entrevistas iniciadas recentemente. Tenta novamente mais tarde.");
+  }
+
   const { jobContext, candidateContext } = await loadInterviewContext(
     applicationId
   );
@@ -202,6 +210,16 @@ export async function endInterview(interviewId: string) {
   if (!interview) throw new Error("Entrevista não encontrada.");
 
   await assertInterviewAccess(admin, interview.application_id);
+
+  const candidate = await getCurrentCandidate();
+  const { allowed } = await checkRateLimit(
+    "interview_end",
+    candidate?.id ?? interviewId,
+    { maxAttempts: 20, windowMinutes: 60 }
+  );
+  if (!allowed) {
+    throw new Error("Demasiadas tentativas. Tenta novamente mais tarde.");
+  }
 
   const { jobContext } = await loadInterviewContext(interview.application_id);
   const transcript = (interview.transcript as TranscriptTurn[]) ?? [];

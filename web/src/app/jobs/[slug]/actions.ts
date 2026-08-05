@@ -33,6 +33,15 @@ export async function createVideoUploadTicket(
   companyId: string,
   fileName: string
 ) {
+  const ip = await getClientIp();
+  const { allowed } = await checkRateLimit("video_upload_ticket", ip, {
+    maxAttempts: 20,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    return { error: "Demasiados pedidos recentes. Tenta novamente mais tarde." };
+  }
+
   const admin = createAdminClient();
   await ensureVideoBucket(admin);
 

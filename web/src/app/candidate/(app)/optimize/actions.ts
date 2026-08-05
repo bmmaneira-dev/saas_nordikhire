@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { optimizeProfile } from "@/lib/profile-optimization";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const VALID_SOURCE_TYPES = ["linkedin", "cv", "other_platform"];
 
@@ -23,6 +24,14 @@ export async function startOptimization(
   }
   if (!inputText) {
     return { error: "Cola o texto do teu perfil ou CV." };
+  }
+
+  const { allowed } = await checkRateLimit("profile_optimization", candidate.id, {
+    maxAttempts: 10,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    return { error: "Demasiadas análises pedidas recentemente. Tenta novamente mais tarde." };
   }
 
   let result;

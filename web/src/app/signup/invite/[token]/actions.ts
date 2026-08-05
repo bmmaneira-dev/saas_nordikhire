@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function acceptInvite(
   token: string,
@@ -17,6 +18,15 @@ export async function acceptInvite(
   }
   if (password.length < 8) {
     return { error: "A password deve ter pelo menos 8 caracteres." };
+  }
+
+  const ip = await getClientIp();
+  const { allowed } = await checkRateLimit("accept_invite", ip, {
+    maxAttempts: 10,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    return { error: "Demasiadas tentativas. Tenta novamente mais tarde." };
   }
 
   const admin = createAdminClient();

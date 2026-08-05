@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentAppUser } from "@/lib/current-user";
+import { checkRateLimit } from "@/lib/rate-limit";
 import {
   generateTestQuestions,
   TEST_CATEGORY_LABELS,
@@ -155,6 +156,12 @@ export async function assignTest(
   const category = String(formData.get("category") ?? "") as TestCategory;
   if (!VALID_TEST_CATEGORIES.includes(category)) return;
 
+  const { allowed } = await checkRateLimit("assign_test", appUser.company_id, {
+    maxAttempts: 30,
+    windowMinutes: 60,
+  });
+  if (!allowed) return;
+
   const { data: provider } = await admin
     .from("test_providers")
     .select("id")
@@ -221,6 +228,12 @@ export async function translateJob(jobId: string, formData: FormData) {
     return;
   }
 
+  const { allowed } = await checkRateLimit("translate_job", appUser.company_id, {
+    maxAttempts: 30,
+    windowMinutes: 60,
+  });
+  if (!allowed) return;
+
   const source =
     job.job_translations.find((t: { locale: string }) => t.locale === "pt") ??
     job.job_translations[0];
@@ -269,6 +282,12 @@ export async function generateReport(applicationId: string, jobId: string) {
     .eq("company_id", appUser.company_id)
     .single();
   if (!job) return;
+
+  const { allowed } = await checkRateLimit("generate_report", appUser.company_id, {
+    maxAttempts: 30,
+    windowMinutes: 60,
+  });
+  if (!allowed) return;
 
   const jobTitle =
     job.job_translations.find((t: { locale: string }) => t.locale === "pt")
@@ -373,6 +392,14 @@ export async function generateFeedbackDraft(
     .maybeSingle();
   if (!job) return { error: "Vaga não encontrada." };
 
+  const { allowed } = await checkRateLimit("generate_feedback_draft", appUser.company_id, {
+    maxAttempts: 30,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    return { error: "Demasiados pedidos recentes. Tenta novamente mais tarde." };
+  }
+
   const jobTitle =
     job.job_translations.find((t: { locale: string }) => t.locale === "pt")
       ?.title ?? job.job_translations[0]?.title ?? "";
@@ -450,6 +477,14 @@ export async function uploadSourcedCv(jobId: string, formData: FormData) {
   }
   if (file.type !== "application/pdf") {
     return { fileName, error: "Só são aceites ficheiros PDF." };
+  }
+
+  const { allowed } = await checkRateLimit("upload_sourced_cv", appUser.company_id, {
+    maxAttempts: 60,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    return { fileName, error: "Demasiados CVs enviados recentemente. Tenta novamente mais tarde." };
   }
 
   const job = await loadJobContext(jobId, appUser.company_id);

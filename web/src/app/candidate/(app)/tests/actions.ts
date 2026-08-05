@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { checkRateLimit } from "@/lib/rate-limit";
 import {
   evaluateTestAnswers,
   type JobContext,
@@ -47,6 +48,14 @@ export async function submitTestAnswers(
 
   if (answers.some((a) => !a)) {
     return { error: "Responde a todas as perguntas antes de submeter." };
+  }
+
+  const { allowed } = await checkRateLimit("submit_test", candidate.id, {
+    maxAttempts: 20,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    return { error: "Demasiadas tentativas. Tenta novamente mais tarde." };
   }
 
   const { data: job } = await admin

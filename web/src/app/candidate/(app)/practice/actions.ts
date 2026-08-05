@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { checkRateLimit } from "@/lib/rate-limit";
 import {
   generateOpeningMessage,
   generateReply,
@@ -31,6 +32,14 @@ export async function startPractice(_prevState: unknown, formData: FormData) {
 
   if (!targetRole) {
     return { error: "Indica o cargo que queres treinar." };
+  }
+
+  const { allowed } = await checkRateLimit("practice_start", candidate.id, {
+    maxAttempts: 10,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    return { error: "Demasiadas sessões criadas recentemente. Tenta novamente mais tarde." };
   }
 
   const jobContext = buildPracticeJobContext(targetRole, notes);
@@ -83,6 +92,14 @@ export async function sendPracticeMessage(
     return { error: "Esta sessão já terminou." };
   }
 
+  const { allowed } = await checkRateLimit("practice_message", candidate.id, {
+    maxAttempts: 40,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    return { error: "Demasiadas mensagens enviadas. Tenta novamente mais tarde." };
+  }
+
   const jobContext = buildPracticeJobContext(
     practice.target_role,
     practice.notes ?? ""
@@ -124,6 +141,14 @@ export async function endPractice(practiceId: string) {
 
   if (!practice || practice.candidate_id !== candidate.id) {
     throw new Error("Sessão não encontrada.");
+  }
+
+  const { allowed } = await checkRateLimit("practice_end", candidate.id, {
+    maxAttempts: 20,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    throw new Error("Demasiadas tentativas. Tenta novamente mais tarde.");
   }
 
   const jobContext = buildPracticeJobContext(
