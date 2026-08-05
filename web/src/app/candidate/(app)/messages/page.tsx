@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -15,6 +17,9 @@ export default async function CandidateMessagesPage() {
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
 
+  const dict = await getDictionary(toLocale(candidate.preferred_locale));
+  const t = dict.candidateMessagesPage;
+
   const admin = createAdminClient();
   const { data: messages } = await admin
     .from("candidate_feedback")
@@ -26,15 +31,15 @@ export default async function CandidateMessagesPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Mensagens</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Actualizações e feedback recebido das empresas a que te candidataste.
+        {t.subtitle}
       </p>
 
       <ul className="mt-6 flex flex-col gap-3">
         {(messages?.length ?? 0) === 0 && (
           <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-            Ainda não recebeste nenhuma mensagem.
+            {t.noMessages}
           </Card>
         )}
         {messages?.map((message) => {
@@ -42,7 +47,7 @@ export default async function CandidateMessagesPage() {
           const job = toOne(application?.jobs);
           const company = toOne(job?.companies);
           const title =
-            job?.job_translations.find((t) => t.locale === "pt")?.title ??
+            job?.job_translations.find((tr) => tr.locale === "pt")?.title ??
             job?.job_translations[0]?.title;
           return (
             <Card key={message.id} className="px-5 py-4">

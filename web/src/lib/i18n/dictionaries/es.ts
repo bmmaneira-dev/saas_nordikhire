@@ -485,6 +485,19 @@ const es: Dictionary = {
     sectionSuggestions: "Sugerencias por sección",
     rewriteSuggestion: "Sugerencia de reescritura",
   },
+  candidateDevelopmentPage: {
+    title: "Desarrollo Profesional",
+    newAnalysis: "Nuevo análisis",
+    subtitle:
+      "Recibe comentarios y sugerencias de reescritura para tu LinkedIn o CV. Herramienta personal — nunca compartida con empresas ni usada en ninguna candidatura. Las brechas de habilidades por vacante, cursos recomendados y un plan de carrera personalizado llegarán en una próxima fase.",
+    noAnalyses: "Todavía no has analizado tu perfil o CV.",
+    viewAnalysis: "Ver análisis →",
+  },
+  candidateMessagesPage: {
+    title: "Mensajes",
+    subtitle: "Actualizaciones y comentarios recibidos de las empresas a las que te postulaste.",
+    noMessages: "Todavía no has recibido ningún mensaje.",
+  },
 };
 
 export default es;

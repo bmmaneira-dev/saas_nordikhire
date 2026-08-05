@@ -2,18 +2,23 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { Card } from "@/components/ui/card";
 import { ButtonLink } from "@/components/ui/button";
-
-const SOURCE_LABELS: Record<string, string> = {
-  linkedin: "Perfil de LinkedIn",
-  cv: "CV",
-  other_platform: "Outra plataforma",
-};
 
 export default async function CandidateDevelopmentPage() {
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
+
+  const dict = await getDictionary(toLocale(candidate.preferred_locale));
+  const t = dict.candidateDevelopmentPage;
+  const tn = dict.candidateOptimizeNew;
+  const SOURCE_LABELS: Record<string, string> = {
+    linkedin: tn.sourceLinkedin,
+    cv: tn.sourceCv,
+    other_platform: tn.sourceOtherPlatform,
+  };
 
   const admin = createAdminClient();
   const { data: optimizations } = await admin
@@ -26,24 +31,20 @@ export default async function CandidateDevelopmentPage() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">
-          Desenvolvimento Profissional
+          {t.title}
         </h1>
         <ButtonLink href="/candidate/optimize/new" size="sm">
-          Nova análise
+          {t.newAnalysis}
         </ButtonLink>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        Recebe feedback e sugestões de reescrita para o teu LinkedIn ou CV.
-        Ferramenta pessoal — nunca partilhada com empresas nem usada em
-        nenhuma candidatura. Lacunas de competências por vaga, cursos
-        recomendados e um plano de carreira personalizado ficam para uma
-        próxima fase.
+        {t.subtitle}
       </p>
 
       <ul className="mt-6 flex flex-col gap-3">
         {(optimizations?.length ?? 0) === 0 && (
           <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-            Ainda não analisaste o teu perfil ou CV.
+            {t.noAnalyses}
           </Card>
         )}
         {optimizations?.map((optimization) => (
@@ -64,7 +65,7 @@ export default async function CandidateDevelopmentPage() {
               href={`/candidate/optimize/${optimization.id}`}
               className="mt-2 inline-block text-sm font-medium text-primary underline"
             >
-              Ver análise →
+              {t.viewAnalysis}
             </Link>
           </Card>
         ))}

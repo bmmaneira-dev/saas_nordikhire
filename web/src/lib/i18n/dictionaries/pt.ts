@@ -466,6 +466,18 @@ export interface Dictionary {
     sectionSuggestions: string;
     rewriteSuggestion: string;
   };
+  candidateDevelopmentPage: {
+    title: string;
+    newAnalysis: string;
+    subtitle: string;
+    noAnalyses: string;
+    viewAnalysis: string;
+  };
+  candidateMessagesPage: {
+    title: string;
+    subtitle: string;
+    noMessages: string;
+  };
 }
 
 const pt: Dictionary = {
@@ -952,6 +964,19 @@ const pt: Dictionary = {
     weaknesses: "A melhorar",
     sectionSuggestions: "Sugestões por secção",
     rewriteSuggestion: "Sugestão de reescrita",
+  },
+  candidateDevelopmentPage: {
+    title: "Desenvolvimento Profissional",
+    newAnalysis: "Nova análise",
+    subtitle:
+      "Recebe feedback e sugestões de reescrita para o teu LinkedIn ou CV. Ferramenta pessoal — nunca partilhada com empresas nem usada em nenhuma candidatura. Lacunas de competências por vaga, cursos recomendados e um plano de carreira personalizado ficam para uma próxima fase.",
+    noAnalyses: "Ainda não analisaste o teu perfil ou CV.",
+    viewAnalysis: "Ver análise →",
+  },
+  candidateMessagesPage: {
+    title: "Mensagens",
+    subtitle: "Actualizações e feedback recebido das empresas a que te candidataste.",
+    noMessages: "Ainda não recebeste nenhuma mensagem.",
   },
 };
 
