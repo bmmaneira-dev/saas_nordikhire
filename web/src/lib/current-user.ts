@@ -13,7 +13,7 @@ export async function getCurrentAppUser() {
   const { data: appUser } = await admin
     .from("users")
     .select(
-      "id, full_name, email, company_id, companies(name, slug), roles(name, permissions)"
+      "id, full_name, email, company_id, companies(name, slug, default_locale), roles(name, permissions)"
     )
     .eq("id", user.id)
     .single();

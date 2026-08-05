@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { candidateLogout } from "@/app/candidate/login/actions";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { CandidateSidebar } from "@/components/candidate-sidebar";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -14,9 +16,11 @@ export default async function CandidateAppLayout({
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
 
+  const dict = await getDictionary(toLocale(candidate.preferred_locale));
+
   return (
     <div className="flex min-h-screen flex-1">
-      <CandidateSidebar />
+      <CandidateSidebar labels={dict.candidateNav} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-surface-border bg-surface px-8 py-4">
           <div>
@@ -29,7 +33,7 @@ export default async function CandidateAppLayout({
             <ThemeToggle />
             <form action={candidateLogout}>
               <Button type="submit" variant="secondary" size="sm">
-                Sair
+                {dict.common.signOut}
               </Button>
             </form>
           </div>

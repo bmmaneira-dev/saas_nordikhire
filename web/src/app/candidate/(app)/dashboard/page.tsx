@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { Card } from "@/components/ui/card";
 import { Badge, statusVariant } from "@/components/ui/badge";
 
@@ -18,6 +20,9 @@ function Kpi({ label, value }: { label: string; value: number }) {
 export default async function CandidateDashboardPage() {
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
+
+  const dict = await getDictionary(toLocale(candidate.preferred_locale));
+  const t = dict.candidateDashboardHome;
 
   const admin = createAdminClient();
 
@@ -75,34 +80,32 @@ export default async function CandidateDashboardPage() {
   return (
     <>
       <h1 className="text-2xl font-semibold tracking-tight">
-        Olá, {candidate.full_name}
+        {t.greeting} {candidate.full_name}
       </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Resumo da tua actividade no NordikHire.
-      </p>
+      <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="Candidaturas activas" value={activeApplicationsResult.count ?? 0} />
-        <Kpi label="Testes pendentes" value={pendingTestsResult.count ?? 0} />
-        <Kpi label="Entrevistas" value={interviewsResult.count ?? 0} />
-        <Kpi label="Feedback recebido" value={feedbackResult.count ?? 0} />
+        <Kpi label={t.activeApplications} value={activeApplicationsResult.count ?? 0} />
+        <Kpi label={t.pendingTests} value={pendingTestsResult.count ?? 0} />
+        <Kpi label={t.interviews} value={interviewsResult.count ?? 0} />
+        <Kpi label={t.feedbackReceived} value={feedbackResult.count ?? 0} />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <section>
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium">Candidaturas recentes</h2>
+            <h2 className="text-lg font-medium">{t.recentApplications}</h2>
             <Link
               href="/candidate/applications"
               className="text-sm font-medium text-primary underline"
             >
-              Ver todas →
+              {t.viewAll}
             </Link>
           </div>
           <ul className="mt-3 flex flex-col gap-2">
             {(recentApplicationsResult.data?.length ?? 0) === 0 && (
               <Card className="border-dashed px-4 py-6 text-center text-sm text-muted-foreground shadow-none">
-                Ainda não te candidataste a nenhuma vaga.
+                {t.noApplicationsYet}
               </Card>
             )}
             {recentApplicationsResult.data?.map((application) => {
@@ -132,18 +135,18 @@ export default async function CandidateDashboardPage() {
 
         <section>
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium">Vagas recentes</h2>
+            <h2 className="text-lg font-medium">{t.recentJobs}</h2>
             <Link
               href="/candidate/jobs"
               className="text-sm font-medium text-primary underline"
             >
-              Explorar vagas →
+              {t.exploreJobs}
             </Link>
           </div>
           <ul className="mt-3 flex flex-col gap-2">
             {(openJobsResult.data?.length ?? 0) === 0 && (
               <Card className="border-dashed px-4 py-6 text-center text-sm text-muted-foreground shadow-none">
-                Não há vagas abertas no momento.
+                {t.noOpenJobs}
               </Card>
             )}
             {openJobsResult.data?.map((job) => {

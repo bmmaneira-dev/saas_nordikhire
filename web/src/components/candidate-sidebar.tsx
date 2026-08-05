@@ -3,26 +3,31 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
-
-const NAV_ITEMS = [
-  { href: "/candidate/dashboard", label: "Dashboard" },
-  { href: "/candidate/jobs", label: "Explorar Vagas" },
-  { href: "/candidate/applications", label: "As Minhas Candidaturas" },
-  { href: "/candidate/profile", label: "O Meu Perfil" },
-  { href: "/candidate/tests", label: "Testes" },
-  { href: "/candidate/interviews", label: "Entrevistas" },
-  { href: "/candidate/practice", label: "Simulador IA" },
-  { href: "/candidate/messages", label: "Mensagens" },
-  { href: "/candidate/development", label: "Desenvolvimento Profissional" },
-];
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 function isActive(pathname: string, href: string) {
   if (href === "/candidate/dashboard") return pathname === "/candidate/dashboard";
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function CandidateSidebar() {
+export function CandidateSidebar({
+  labels,
+}: {
+  labels: Dictionary["candidateNav"];
+}) {
   const pathname = usePathname();
+
+  const navItems = [
+    { href: "/candidate/dashboard", label: labels.dashboard },
+    { href: "/candidate/jobs", label: labels.jobs },
+    { href: "/candidate/applications", label: labels.applications },
+    { href: "/candidate/profile", label: labels.profile },
+    { href: "/candidate/tests", label: labels.tests },
+    { href: "/candidate/interviews", label: labels.interviews },
+    { href: "/candidate/practice", label: labels.practice },
+    { href: "/candidate/messages", label: labels.messages },
+    { href: "/candidate/development", label: labels.development },
+  ];
 
   return (
     <nav className="flex h-full w-56 shrink-0 flex-col border-r border-surface-border bg-surface px-4 py-6">
@@ -30,7 +35,7 @@ export function CandidateSidebar() {
         <Logo />
       </Link>
       <ul className="mt-8 flex flex-col gap-0.5">
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const active = isActive(pathname, item.href);
           return (
             <li key={item.href}>

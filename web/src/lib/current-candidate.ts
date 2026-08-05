@@ -12,7 +12,7 @@ export async function getCurrentCandidate() {
   const admin = createAdminClient();
   const { data: candidate } = await admin
     .from("candidates")
-    .select("id, full_name, email, auth_user_id")
+    .select("id, full_name, email, auth_user_id, preferred_locale")
     .eq("auth_user_id", user.id)
     .maybeSingle();
 

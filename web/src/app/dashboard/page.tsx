@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { getOnboardingSteps } from "@/lib/onboarding";
 import { markIntegrationsReviewed } from "./settings/actions";
 import { Card } from "@/components/ui/card";
@@ -21,6 +23,10 @@ function Kpi({ label, value }: { label: string; value: number }) {
 export default async function DashboardPage() {
   const appUser = await getCurrentAppUser();
   if (!appUser) redirect("/login");
+
+  const company = toOne(appUser.companies);
+  const dict = await getDictionary(toLocale(company?.default_locale));
+  const t = dict.dashboardHome;
 
   const admin = createAdminClient();
 
@@ -81,23 +87,21 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Visão geral do recrutamento.
-      </p>
+      <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="Vagas activas" value={activeJobsResult.count ?? 0} />
+        <Kpi label={t.activeJobs} value={activeJobsResult.count ?? 0} />
         <Kpi
-          label="Candidaturas por decidir"
+          label={t.pendingApplications}
           value={pendingApplicationsResult.count ?? 0}
         />
         <Kpi
-          label="Entrevistas em curso"
+          label={t.interviewsInProgress}
           value={inProgressInterviewsResult.count ?? 0}
         />
         <Kpi
-          label="Alertas (red flags altas)"
+          label={t.highRedFlags}
           value={highRedFlagsResult.count ?? 0}
         />
       </div>
@@ -105,7 +109,7 @@ export default async function DashboardPage() {
       {!allDone && (
         <Card className="mt-8 px-6 py-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium">Primeiros passos</h2>
+            <h2 className="text-lg font-medium">{t.firstSteps}</h2>
             <span className="text-sm text-muted-foreground">
               {doneCount} de {onboardingSteps.length}
             </span>
@@ -140,7 +144,7 @@ export default async function DashboardPage() {
                 {step.key === "integrations_reviewed" && !step.done && (
                   <form action={markIntegrationsReviewed}>
                     <Button type="submit" variant="ghost" size="sm">
-                      Marcar como feito
+                      {t.markAsDone}
                     </Button>
                   </form>
                 )}
@@ -152,25 +156,25 @@ export default async function DashboardPage() {
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <section>
-          <h2 className="text-lg font-medium">Actividade recente</h2>
+          <h2 className="text-lg font-medium">{t.recentActivity}</h2>
           <ul className="mt-3 flex flex-col gap-2">
             {(recentApplicationsResult.data?.length ?? 0) === 0 && (
               <Card className="border-dashed px-4 py-6 text-center text-sm text-muted-foreground shadow-none">
-                Ainda não há candidaturas.
+                {t.noRecentActivity}
               </Card>
             )}
             {recentApplicationsResult.data?.map((application) => {
               const candidate = toOne(application.candidates);
               const job = toOne(application.jobs);
               const title =
-                job?.job_translations.find((t) => t.locale === "pt")?.title ??
+                job?.job_translations.find((tr) => tr.locale === "pt")?.title ??
                 job?.job_translations[0]?.title;
               return (
                 <Card key={application.id} className="px-4 py-3">
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-sm">
                       <span className="font-medium">{candidate?.full_name}</span>{" "}
-                      candidatou-se a{" "}
+                      {t.appliedTo}{" "}
                       <span className="font-medium">{title}</span>
                     </p>
                     <Badge variant={statusVariant(application.status)}>
@@ -184,11 +188,11 @@ export default async function DashboardPage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-medium">Entrevistas em curso</h2>
+          <h2 className="text-lg font-medium">{t.interviewsInProgressSection}</h2>
           <ul className="mt-3 flex flex-col gap-2">
             {(upcomingInterviewsResult.data?.length ?? 0) === 0 && (
               <Card className="border-dashed px-4 py-6 text-center text-sm text-muted-foreground shadow-none">
-                Nenhuma entrevista em curso.
+                {t.noInterviewsInProgress}
               </Card>
             )}
             {upcomingInterviewsResult.data?.map((interview) => {
@@ -196,7 +200,7 @@ export default async function DashboardPage() {
               const candidate = toOne(application?.candidates);
               const job = toOne(application?.jobs);
               const title =
-                job?.job_translations.find((t) => t.locale === "pt")?.title ??
+                job?.job_translations.find((tr) => tr.locale === "pt")?.title ??
                 job?.job_translations[0]?.title;
               return (
                 <Card key={interview.id} className="px-4 py-3">

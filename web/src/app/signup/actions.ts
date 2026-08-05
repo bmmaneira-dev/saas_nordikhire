@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { toLocale } from "@/lib/i18n/locale";
 
 function slugify(name: string) {
   const diacritics = new RegExp(
@@ -24,6 +25,7 @@ export async function signup(_prevState: unknown, formData: FormData) {
   const fullName = String(formData.get("fullName") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const locale = toLocale(String(formData.get("locale") ?? ""));
 
   if (!companyName || !fullName || !email || !password) {
     return { error: "Preenche todos os campos." };
@@ -73,7 +75,7 @@ export async function signup(_prevState: unknown, formData: FormData) {
 
   const { data: company, error: companyError } = await admin
     .from("companies")
-    .insert({ name: companyName, slug: slugify(companyName) })
+    .insert({ name: companyName, slug: slugify(companyName), default_locale: locale })
     .select("id")
     .single();
 

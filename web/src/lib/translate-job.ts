@@ -1,16 +1,10 @@
 import { getAnthropicClient } from "./anthropic";
+import { SUPPORTED_LOCALES, LOCALE_LABELS, type Locale } from "./i18n/locale";
 
 const MODEL = "claude-haiku-4-5";
 
-export const SUPPORTED_LOCALES = ["pt", "en", "fr", "es"] as const;
-export type Locale = (typeof SUPPORTED_LOCALES)[number];
-
-export const LOCALE_LABELS: Record<Locale, string> = {
-  pt: "Português",
-  en: "English",
-  fr: "Français",
-  es: "Español",
-};
+export { SUPPORTED_LOCALES, LOCALE_LABELS };
+export type { Locale };
 
 export interface JobTranslationContent {
   title: string;

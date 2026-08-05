@@ -3,12 +3,14 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { toLocale } from "@/lib/i18n/locale";
 
 export async function candidateSignup(_prevState: unknown, formData: FormData) {
   const fullName = String(formData.get("fullName") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const consent = formData.get("consent") === "on";
+  const locale = toLocale(String(formData.get("locale") ?? ""));
 
   if (!fullName || !email || !password) {
     return { error: "Preenche todos os campos." };
@@ -75,6 +77,7 @@ export async function candidateSignup(_prevState: unknown, formData: FormData) {
         .update({
           auth_user_id: userId,
           full_name: fullName,
+          preferred_locale: locale,
           consent_data_processing: true,
           consent_date: new Date().toISOString(),
         })
@@ -88,6 +91,7 @@ export async function candidateSignup(_prevState: unknown, formData: FormData) {
       auth_user_id: userId,
       full_name: fullName,
       email,
+      preferred_locale: locale,
       consent_data_processing: true,
       consent_date: new Date().toISOString(),
     });

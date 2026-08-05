@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { AuthShell } from "@/components/auth-shell";
-import { Field, Input, PasswordInput } from "@/components/ui/field";
+import { Field, Input, PasswordInput, Select } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { signup } from "./actions";
+import { SUPPORTED_LOCALES, LOCALE_LABELS } from "@/lib/i18n/locale";
 
 export default function SignupPage() {
   const [state, formAction, pending] = useActionState(signup, undefined);
@@ -35,6 +36,15 @@ export default function SignupPage() {
         </Field>
         <Field label="Password">
           <PasswordInput name="password" required minLength={8} />
+        </Field>
+        <Field label="Língua da interface">
+          <Select name="locale" defaultValue="pt">
+            {SUPPORTED_LOCALES.map((locale) => (
+              <option key={locale} value={locale}>
+                {LOCALE_LABELS[locale]}
+              </option>
+            ))}
+          </Select>
         </Field>
 
         {state?.error && <p className="text-sm text-danger">{state.error}</p>}

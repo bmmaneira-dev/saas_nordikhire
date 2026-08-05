@@ -3,27 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
-
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/dashboard/jobs", label: "Vagas" },
-  { href: "/dashboard/candidates", label: "Candidatos" },
-  { href: "/dashboard/pipeline", label: "Pipeline" },
-  { href: "/dashboard/tests", label: "Testes" },
-  { href: "/dashboard/interviews", label: "Entrevistas" },
-  { href: "/dashboard/talent-pool", label: "Banco de Talentos" },
-  { href: "/dashboard/messages", label: "Mensagens" },
-  { href: "/dashboard/reports", label: "Relatórios" },
-  { href: "/dashboard/company", label: "Empresa" },
-];
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 function isActive(pathname: string, href: string) {
   if (href === "/dashboard") return pathname === "/dashboard";
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function DashboardSidebar() {
+export function DashboardSidebar({ labels }: { labels: Dictionary["nav"] }) {
   const pathname = usePathname();
+
+  const navItems = [
+    { href: "/dashboard", label: labels.dashboard },
+    { href: "/dashboard/jobs", label: labels.jobs },
+    { href: "/dashboard/candidates", label: labels.candidates },
+    { href: "/dashboard/pipeline", label: labels.pipeline },
+    { href: "/dashboard/tests", label: labels.tests },
+    { href: "/dashboard/interviews", label: labels.interviews },
+    { href: "/dashboard/talent-pool", label: labels.talentPool },
+    { href: "/dashboard/messages", label: labels.messages },
+    { href: "/dashboard/reports", label: labels.reports },
+    { href: "/dashboard/company", label: labels.company },
+  ];
 
   return (
     <nav className="flex h-full w-56 shrink-0 flex-col border-r border-surface-border bg-surface px-4 py-6">
@@ -31,7 +32,7 @@ export function DashboardSidebar() {
         <Logo />
       </Link>
       <ul className="mt-8 flex flex-col gap-0.5">
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const active = isActive(pathname, item.href);
           return (
             <li key={item.href}>
