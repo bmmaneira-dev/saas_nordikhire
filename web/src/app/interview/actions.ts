@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
+import { getCurrentAppUser } from "@/lib/current-user";
+import { getCurrentCandidate } from "@/lib/current-candidate";
+import { checkRateLimit } from "@/lib/rate-limit";
 import {
   generateOpeningMessage,
   generateReply,
@@ -62,8 +65,47 @@ async function loadInterviewContext(
   };
 }
 
+// Uma entrevista é acedida tanto pelo recrutador da empresa dona da vaga
+// como pelo candidato dono da candidatura. Qualquer outra pessoa (incluindo
+// visitantes sem sessão) tem de ser recusada.
+async function assertInterviewAccess(
+  admin: ReturnType<typeof createAdminClient>,
+  applicationId: string
+): Promise<void> {
+  const [appUser, candidate] = await Promise.all([
+    getCurrentAppUser(),
+    getCurrentCandidate(),
+  ]);
+
+  const { data: application } = await admin
+    .from("applications")
+    .select("company_id, candidate_id")
+    .eq("id", applicationId)
+    .single();
+  if (!application) throw new Error("Candidatura não encontrada.");
+
+  const isOwningRecruiter = appUser?.company_id === application.company_id;
+  const isOwningCandidate = candidate?.id === application.candidate_id;
+
+  if (!isOwningRecruiter && !isOwningCandidate) {
+    throw new Error("Sem permissão para aceder a esta entrevista.");
+  }
+}
+
 export async function startInterview(applicationId: string) {
+  const appUser = await getCurrentAppUser();
+  if (!appUser) throw new Error("Sem permissão para iniciar esta entrevista.");
+
   const admin = createAdminClient();
+  const { data: application } = await admin
+    .from("applications")
+    .select("company_id")
+    .eq("id", applicationId)
+    .single();
+  if (!application || application.company_id !== appUser.company_id) {
+    throw new Error("Sem permissão para iniciar esta entrevista.");
+  }
+
   const { jobContext, candidateContext } = await loadInterviewContext(
     applicationId
   );
@@ -104,8 +146,25 @@ export async function sendInterviewMessage(
     .single();
 
   if (!interview) return { error: "Entrevista não encontrada." };
+
+  try {
+    await assertInterviewAccess(admin, interview.application_id);
+  } catch {
+    return { error: "Sem permissão para aceder a esta entrevista." };
+  }
+
   if (interview.status === "completed") {
     return { error: "Esta entrevista já terminou." };
+  }
+
+  const candidate = await getCurrentCandidate();
+  const { allowed } = await checkRateLimit(
+    "interview_message",
+    candidate?.id ?? interviewId,
+    { maxAttempts: 40, windowMinutes: 60 }
+  );
+  if (!allowed) {
+    return { error: "Demasiadas mensagens enviadas. Tenta novamente mais tarde." };
   }
 
   const { jobContext, candidateContext } = await loadInterviewContext(
@@ -141,6 +200,8 @@ export async function endInterview(interviewId: string) {
     .single();
 
   if (!interview) throw new Error("Entrevista não encontrada.");
+
+  await assertInterviewAccess(admin, interview.application_id);
 
   const { jobContext } = await loadInterviewContext(interview.application_id);
   const transcript = (interview.transcript as TranscriptTurn[]) ?? [];

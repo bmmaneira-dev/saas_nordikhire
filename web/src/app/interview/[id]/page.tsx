@@ -41,7 +41,7 @@ export default async function InterviewPage({
   const { data: interview } = await admin
     .from("ai_interviews")
     .select(
-      "id, status, transcript, ai_evaluation, ai_summary, applications(candidates(full_name), jobs(job_translations(title, locale)))"
+      "id, status, transcript, ai_evaluation, ai_summary, applications(company_id, candidate_id, candidates(full_name), jobs(job_translations(title, locale)))"
     )
     .eq("id", id)
     .maybeSingle();
@@ -49,6 +49,11 @@ export default async function InterviewPage({
   if (!interview) notFound();
 
   const application = toOne(interview.applications);
+
+  const isOwningRecruiter = appUser?.company_id === application?.company_id;
+  const isOwningCandidate = candidateUser?.id === application?.candidate_id;
+  if (!isOwningRecruiter && !isOwningCandidate) notFound();
+
   const candidate = toOne(application?.candidates);
   const job = toOne(application?.jobs);
   const translation =

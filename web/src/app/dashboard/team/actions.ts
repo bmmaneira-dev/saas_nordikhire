@@ -26,6 +26,16 @@ export async function inviteTeammate(_prevState: unknown, formData: FormData) {
 
   const admin = createAdminClient();
 
+  const { data: role } = await admin
+    .from("roles")
+    .select("id")
+    .eq("id", roleId)
+    .eq("company_id", appUser.company_id)
+    .maybeSingle();
+  if (!role) {
+    return { error: "Papel inválido." };
+  }
+
   const { data: existingUser } = await admin
     .from("users")
     .select("id")

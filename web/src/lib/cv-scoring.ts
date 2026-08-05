@@ -177,17 +177,21 @@ Identifica também red flags claramente presentes no CV — ex: gaps de emprego 
 }
 
 export async function loadJobContext(
-  jobId: string
+  jobId: string,
+  companyId?: string
 ): Promise<JobContext | null> {
   const admin = createAdminClient();
 
-  const { data: job } = await admin
+  let query = admin
     .from("jobs")
     .select(
       "skills_required, seniority_level, job_translations(title, description, requirements_text, locale)"
     )
-    .eq("id", jobId)
-    .single();
+    .eq("id", jobId);
+  if (companyId) {
+    query = query.eq("company_id", companyId);
+  }
+  const { data: job } = await query.single();
 
   if (!job) return null;
 

@@ -169,6 +169,7 @@ export async function assignTest(
       "skills_required, seniority_level, job_translations(title, description, requirements_text, locale)"
     )
     .eq("id", jobId)
+    .eq("company_id", appUser.company_id)
     .single();
   if (!job) return;
 
@@ -265,6 +266,7 @@ export async function generateReport(applicationId: string, jobId: string) {
     .from("jobs")
     .select("job_translations(title, locale)")
     .eq("id", jobId)
+    .eq("company_id", appUser.company_id)
     .single();
   if (!job) return;
 
@@ -450,7 +452,7 @@ export async function uploadSourcedCv(jobId: string, formData: FormData) {
     return { fileName, error: "Só são aceites ficheiros PDF." };
   }
 
-  const job = await loadJobContext(jobId);
+  const job = await loadJobContext(jobId, appUser.company_id);
   if (!job) {
     return { fileName, error: "Vaga não encontrada." };
   }
@@ -538,7 +540,8 @@ export async function uploadSourcedCv(jobId: string, formData: FormData) {
 
   try {
     await ensureCvBucket(admin);
-    const path = `${appUser.company_id}/${jobId}/${candidateId}-${fileName}`;
+    const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
+    const path = `${appUser.company_id}/${jobId}/${candidateId}-${safeName}`;
     const { error: uploadError } = await admin.storage
       .from(CV_BUCKET)
       .upload(path, cvBytes, { upsert: true, contentType: "application/pdf" });

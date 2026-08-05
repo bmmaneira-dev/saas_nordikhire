@@ -86,6 +86,20 @@ export async function applyToJob(
 
   const admin = createAdminClient();
 
+  // jobId/companyId chegam como argumentos de uma Server Action invocável
+  // diretamente, por isso não podemos confiar que o par corresponde
+  // realmente a uma vaga publicada dessa empresa.
+  const { data: job } = await admin
+    .from("jobs")
+    .select("id")
+    .eq("id", jobId)
+    .eq("company_id", companyId)
+    .eq("status", "open")
+    .maybeSingle();
+  if (!job) {
+    return { error: "Esta vaga já não está disponível." };
+  }
+
   const { data: existingCandidate } = await admin
     .from("candidates")
     .select("id")
@@ -119,7 +133,8 @@ export async function applyToJob(
     cvBytes = new Uint8Array(await cvFile.arrayBuffer());
     try {
       await ensureCvBucket(admin);
-      const path = `${companyId}/${jobId}/${candidateId}-${cvFile.name}`;
+      const safeName = cvFile.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
+      const path = `${companyId}/${jobId}/${candidateId}-${safeName}`;
       const { error: uploadError } = await admin.storage
         .from(CV_BUCKET)
         .upload(path, cvBytes, {
