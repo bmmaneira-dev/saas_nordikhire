@@ -6,6 +6,10 @@ import { InterviewChat } from "./chat";
 import { endInterview } from "../actions";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
+import { getCurrentAppUser } from "@/lib/current-user";
+import { getCurrentCandidate } from "@/lib/current-candidate";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 
 interface Evaluation {
   communication: number;
@@ -22,6 +26,18 @@ export default async function InterviewPage({
   const { id } = await params;
   const admin = createAdminClient();
 
+  const [appUser, candidateUser] = await Promise.all([
+    getCurrentAppUser(),
+    getCurrentCandidate(),
+  ]);
+  const company = toOne(appUser?.companies);
+  const locale = appUser
+    ? toLocale(company?.default_locale)
+    : toLocale(candidateUser?.preferred_locale);
+  const dict = await getDictionary(locale);
+  const t = dict.interviewPage;
+  const te = dict.interviewEvaluation;
+
   const { data: interview } = await admin
     .from("ai_interviews")
     .select(
@@ -37,7 +53,7 @@ export default async function InterviewPage({
   const job = toOne(application?.jobs);
   const translation =
     job?.job_translations?.find(
-      (t: { locale: string }) => t.locale === "pt"
+      (tr: { locale: string }) => tr.locale === "pt"
     ) ?? job?.job_translations?.[0];
 
   const transcript = (interview.transcript ?? []) as TranscriptTurn[];
@@ -49,7 +65,7 @@ export default async function InterviewPage({
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-12">
         <p className="text-sm text-muted-foreground">{translation?.title}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-          Entrevista com IA — {candidate?.full_name}
+          {t.aiInterviewWith} {candidate?.full_name}
         </h1>
 
         <div className="mt-6 flex flex-col gap-3">
@@ -73,13 +89,13 @@ export default async function InterviewPage({
 
         {interview.status === "completed" ? (
           <section className="mt-8 border-t border-surface-border pt-6">
-            <h2 className="text-lg font-medium">Avaliação</h2>
+            <h2 className="text-lg font-medium">{t.evaluation}</h2>
             {evaluation && (
               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <span>Comunicação: {evaluation.communication}</span>
-                <span>Profundidade técnica: {evaluation.technical_depth}</span>
-                <span>Resolução de problemas: {evaluation.problem_solving}</span>
-                <span>Adequação cultural: {evaluation.cultural_fit}</span>
+                <span>{te.communication}: {evaluation.communication}</span>
+                <span>{te.technicalDepth}: {evaluation.technical_depth}</span>
+                <span>{te.problemSolving}: {evaluation.problem_solving}</span>
+                <span>{te.culturalFit}: {evaluation.cultural_fit}</span>
               </div>
             )}
             {interview.ai_summary && (
@@ -91,14 +107,14 @@ export default async function InterviewPage({
         ) : (
           <>
             <div className="mt-6">
-              <InterviewChat interviewId={interview.id} />
+              <InterviewChat interviewId={interview.id} dict={dict} />
             </div>
             <form
               action={endInterview.bind(null, interview.id)}
               className="mt-4"
             >
               <Button type="submit" variant="ghost" size="sm">
-                Terminar entrevista e gerar avaliação
+                {t.endInterview}
               </Button>
             </form>
           </>

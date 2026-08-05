@@ -333,6 +333,14 @@ export interface Dictionary {
     scoreLabel: string;
     processingCvs: string;
   };
+  interviewPage: {
+    aiInterviewWith: string;
+    evaluation: string;
+    endInterview: string;
+    chatPlaceholder: string;
+    sending: string;
+    sendAnswer: string;
+  };
 }
 
 const pt: Dictionary = {
@@ -676,6 +684,14 @@ const pt: Dictionary = {
     statusProcessing: "a processar...",
     scoreLabel: "score",
     processingCvs: "A processar CVs...",
+  },
+  interviewPage: {
+    aiInterviewWith: "Entrevista com IA —",
+    evaluation: "Avaliação",
+    endInterview: "Terminar entrevista e gerar avaliação",
+    chatPlaceholder: "Escreve a tua resposta...",
+    sending: "A enviar...",
+    sendAnswer: "Enviar resposta",
   },
 };
 

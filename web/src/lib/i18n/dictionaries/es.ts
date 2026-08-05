@@ -342,6 +342,14 @@ const es: Dictionary = {
     scoreLabel: "puntuación",
     processingCvs: "Procesando CVs...",
   },
+  interviewPage: {
+    aiInterviewWith: "Entrevista con IA —",
+    evaluation: "Evaluación",
+    endInterview: "Terminar entrevista y generar evaluación",
+    chatPlaceholder: "Escribe tu respuesta...",
+    sending: "Enviando...",
+    sendAnswer: "Enviar respuesta",
+  },
 };
 
 export default es;

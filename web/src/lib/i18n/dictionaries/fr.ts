@@ -342,6 +342,14 @@ const fr: Dictionary = {
     scoreLabel: "score",
     processingCvs: "Traitement des CV...",
   },
+  interviewPage: {
+    aiInterviewWith: "Entretien IA —",
+    evaluation: "Évaluation",
+    endInterview: "Terminer l'entretien et générer l'évaluation",
+    chatPlaceholder: "Écris ta réponse...",
+    sending: "Envoi...",
+    sendAnswer: "Envoyer la réponse",
+  },
 };
 
 export default fr;
