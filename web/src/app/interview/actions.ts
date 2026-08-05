@@ -7,6 +7,7 @@ import { toOne } from "@/lib/to-one";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { clampScore } from "@/lib/clamp";
 import {
   generateOpeningMessage,
   generateReply,
@@ -238,10 +239,10 @@ export async function endInterview(interviewId: string) {
       completed_at: new Date().toISOString(),
       duration_seconds: durationSeconds,
       ai_evaluation: {
-        communication: evaluation.communication,
-        technical_depth: evaluation.technical_depth,
-        problem_solving: evaluation.problem_solving,
-        cultural_fit: evaluation.cultural_fit,
+        communication: clampScore(evaluation.communication, 0, 10),
+        technical_depth: clampScore(evaluation.technical_depth, 0, 10),
+        problem_solving: clampScore(evaluation.problem_solving, 0, 10),
+        cultural_fit: clampScore(evaluation.cultural_fit, 0, 10),
       },
       ai_summary: evaluation.summary,
     })

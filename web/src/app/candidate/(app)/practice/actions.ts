@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { clampScore } from "@/lib/clamp";
 import {
   generateOpeningMessage,
   generateReply,
@@ -164,10 +165,10 @@ export async function endPractice(practiceId: string) {
       status: "completed",
       completed_at: new Date().toISOString(),
       ai_evaluation: {
-        communication: evaluation.communication,
-        technical_depth: evaluation.technical_depth,
-        problem_solving: evaluation.problem_solving,
-        cultural_fit: evaluation.cultural_fit,
+        communication: clampScore(evaluation.communication, 0, 10),
+        technical_depth: clampScore(evaluation.technical_depth, 0, 10),
+        problem_solving: clampScore(evaluation.problem_solving, 0, 10),
+        cultural_fit: clampScore(evaluation.cultural_fit, 0, 10),
       },
       ai_summary: evaluation.summary,
     })

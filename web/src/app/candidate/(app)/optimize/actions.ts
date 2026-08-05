@@ -5,6 +5,7 @@ import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { optimizeProfile } from "@/lib/profile-optimization";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { clampScore } from "@/lib/clamp";
 
 const VALID_SOURCE_TYPES = ["linkedin", "cv", "other_platform"];
 
@@ -56,7 +57,7 @@ export async function startOptimization(
       section_feedback: result.section_feedback,
       strengths: result.strengths,
       weaknesses: result.weaknesses,
-      overall_score: result.overall_score,
+      overall_score: clampScore(result.overall_score),
       overall_summary: result.overall_summary,
       tier_used: "free",
       ai_model: "claude-haiku-4-5",

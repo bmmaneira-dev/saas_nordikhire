@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { clampScore } from "@/lib/clamp";
 import {
   evaluateTestAnswers,
   type JobContext,
@@ -81,18 +82,22 @@ export async function submitTestAnswers(
   };
 
   const evaluation = await evaluateTestAnswers(category, jobContext, questions, answers);
+  const clampedPerQuestion = evaluation.per_question.map((q) => ({
+    ...q,
+    score: clampScore(q.score, 0, 10),
+  }));
 
   await admin
     .from("test_assignments")
     .update({
       status: "completed",
-      result_score: evaluation.overall_score,
+      result_score: clampScore(evaluation.overall_score),
       result_raw: {
         category,
         questions,
         answers,
         overall_summary: evaluation.overall_summary,
-        per_question: evaluation.per_question,
+        per_question: clampedPerQuestion,
         recommendation: evaluation.recommendation,
         recommendation_reason: evaluation.recommendation_reason,
       },

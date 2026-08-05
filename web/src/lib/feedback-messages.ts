@@ -99,14 +99,16 @@ export async function generateFeedbackDraftMessage(
     max_tokens: 600,
     output_config: { format: { type: "json_schema", schema: DRAFT_SCHEMA } },
     system:
-      "És um assistente de recrutamento que escreve mensagens de feedback para candidatos, em nome de uma empresa, em português. As mensagens devem soar humanas e específicas — nunca genéricas, nunca robóticas, nunca com jargão corporativo vazio — e basear-se apenas nos dados fornecidos, sem inventar factos que não constam deles. Tom profissional mas próximo, no máximo 3-5 frases, sem saudação nem assinatura (a plataforma trata disso).",
+      "És um assistente de recrutamento que escreve mensagens de feedback para candidatos, em nome de uma empresa, em português. As mensagens devem soar humanas e específicas — nunca genéricas, nunca robóticas, nunca com jargão corporativo vazio — e basear-se apenas nos dados fornecidos, sem inventar factos que não constam deles. Tom profissional mas próximo, no máximo 3-5 frases, sem saudação nem assinatura (a plataforma trata disso). Este rascunho é sempre revisto por um recrutador humano antes de ser enviado.",
     messages: [
       {
         role: "user",
         content: `VAGA: ${input.jobTitle}
 CANDIDATO: ${input.candidateName}
 
+<candidate_evaluation_data>
 ${buildContext(input)}
+</candidate_evaluation_data>
 
 ${instruction}`,
       },
