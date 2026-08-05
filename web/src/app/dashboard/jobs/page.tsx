@@ -2,15 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentAppUser } from "@/lib/current-user";
+import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { statusLabel } from "@/lib/i18n/status-label";
 import { Card } from "@/components/ui/card";
 import { Badge, statusVariant } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
-
-const TABS = [
-  { key: "open", label: "Activas", statuses: ["open"] },
-  { key: "draft", label: "Rascunhos", statuses: ["draft"] },
-  { key: "closed", label: "Encerradas", statuses: ["closed", "paused"] },
-] as const;
 
 export default async function JobsIndexPage({
   searchParams,
@@ -20,8 +18,18 @@ export default async function JobsIndexPage({
   const appUser = await getCurrentAppUser();
   if (!appUser) redirect("/login");
 
+  const company = toOne(appUser.companies);
+  const dict = await getDictionary(toLocale(company?.default_locale));
+  const t = dict.jobsList;
+
+  const TABS = [
+    { key: "open", label: t.tabActive, statuses: ["open"] },
+    { key: "draft", label: t.tabDrafts, statuses: ["draft"] },
+    { key: "closed", label: t.tabClosed, statuses: ["closed", "paused"] },
+  ] as const;
+
   const { tab: tabParam } = await searchParams;
-  const activeTab = TABS.find((t) => t.key === tabParam) ?? TABS[0];
+  const activeTab = TABS.find((tb) => tb.key === tabParam) ?? TABS[0];
 
   const admin = createAdminClient();
   const { data: jobs } = await admin
@@ -36,9 +44,9 @@ export default async function JobsIndexPage({
   return (
     <>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Vagas</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
         <ButtonLink href="/dashboard/jobs/new" size="sm">
-          Nova vaga
+          {t.newJob}
         </ButtonLink>
       </div>
 
@@ -61,33 +69,35 @@ export default async function JobsIndexPage({
       <ul className="mt-6 flex flex-col gap-3">
         {jobs?.length === 0 && (
           <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-            Nenhuma vaga nesta categoria.
+            {t.noJobsInCategory}
           </Card>
         )}
         {jobs?.map((job) => {
           const title =
-            job.job_translations.find((t) => t.locale === "pt")?.title ??
+            job.job_translations.find((tr) => tr.locale === "pt")?.title ??
             job.job_translations[0]?.title ??
             "(sem título)";
           return (
             <Card key={job.id} className="px-5 py-4">
               <div className="flex items-center justify-between gap-3">
                 <span className="font-medium">{title}</span>
-                <Badge variant={statusVariant(job.status)}>{job.status}</Badge>
+                <Badge variant={statusVariant(job.status)}>
+                  {statusLabel(dict, job.status)}
+                </Badge>
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 {[job.seniority_level, job.location, job.work_mode]
                   .filter(Boolean)
                   .join(" · ")}
                 {" · "}
-                {job.applications.length} candidatura(s)
+                {job.applications.length} {t.applicationsCount}
               </p>
               <div className="mt-3 flex gap-5">
                 <Link
                   href={`/dashboard/jobs/${job.id}`}
                   className="text-sm font-medium text-primary underline"
                 >
-                  Ver candidatos →
+                  {t.viewCandidates}
                 </Link>
                 {job.status === "open" && job.public_slug && (
                   <Link
@@ -95,7 +105,7 @@ export default async function JobsIndexPage({
                     className="text-sm font-medium text-primary underline"
                     target="_blank"
                   >
-                    Ver página pública →
+                    {t.viewPublicPage}
                   </Link>
                 )}
               </div>

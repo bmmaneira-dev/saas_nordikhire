@@ -3,17 +3,9 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { Card } from "@/components/ui/card";
-
-const COLUMNS = [
-  { key: "received", label: "Recebidos", statuses: ["received", "screening", "scored"] },
-  { key: "shortlisted", label: "Pré-selecionados", statuses: ["shortlisted"] },
-  { key: "test", label: "Em avaliação", statuses: ["test"] },
-  { key: "interview", label: "Entrevistas", statuses: ["interview"] },
-  { key: "offer", label: "Oferta", statuses: ["offer"] },
-  { key: "hired", label: "Contratados", statuses: ["hired"] },
-  { key: "rejected", label: "Rejeitados", statuses: ["rejected", "withdrawn"] },
-] as const;
 
 export default async function PipelinePage({
   searchParams,
@@ -22,6 +14,20 @@ export default async function PipelinePage({
 }) {
   const appUser = await getCurrentAppUser();
   if (!appUser) redirect("/login");
+
+  const company = toOne(appUser.companies);
+  const dict = await getDictionary(toLocale(company?.default_locale));
+  const t = dict.pipeline;
+
+  const COLUMNS = [
+    { key: "received", label: t.colReceived, statuses: ["received", "screening", "scored"] },
+    { key: "shortlisted", label: t.colShortlisted, statuses: ["shortlisted"] },
+    { key: "test", label: t.colTest, statuses: ["test"] },
+    { key: "interview", label: t.colInterview, statuses: ["interview"] },
+    { key: "offer", label: t.colOffer, statuses: ["offer"] },
+    { key: "hired", label: t.colHired, statuses: ["hired"] },
+    { key: "rejected", label: t.colRejected, statuses: ["rejected", "withdrawn"] },
+  ] as const;
 
   const { job: jobFilter } = await searchParams;
 
@@ -51,10 +57,8 @@ export default async function PipelinePage({
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Pipeline</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Vista visual do processo de recrutamento, por etapa.
-      </p>
+      <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
 
       <div className="mt-4 flex flex-wrap gap-2">
         <Link
@@ -65,11 +69,11 @@ export default async function PipelinePage({
               : "border-surface-border text-muted-foreground hover:text-foreground"
           }`}
         >
-          Todas as vagas
+          {t.allJobs}
         </Link>
         {jobs?.map((job) => {
           const title =
-            job.job_translations.find((t) => t.locale === "pt")?.title ??
+            job.job_translations.find((tr) => tr.locale === "pt")?.title ??
             job.job_translations[0]?.title;
           return (
             <Link
@@ -107,7 +111,7 @@ export default async function PipelinePage({
                   const candidate = toOne(application.candidates);
                   const job = toOne(application.jobs);
                   const title =
-                    job?.job_translations.find((t) => t.locale === "pt")
+                    job?.job_translations.find((tr) => tr.locale === "pt")
                       ?.title ?? job?.job_translations[0]?.title;
                   return (
                     <Link
@@ -132,7 +136,7 @@ export default async function PipelinePage({
                 })}
                 {items.length === 0 && (
                   <div className="rounded-xl border border-dashed border-surface-border px-3 py-6 text-center text-xs text-muted-foreground">
-                    Vazio
+                    {t.empty}
                   </div>
                 )}
               </div>

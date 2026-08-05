@@ -3,6 +3,9 @@ import { notFound, redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { statusLabel } from "@/lib/i18n/status-label";
 import { Card } from "@/components/ui/card";
 import { Badge, statusVariant } from "@/components/ui/badge";
 
@@ -14,6 +17,10 @@ export default async function CandidateProfilePage({
   const { id } = await params;
   const appUser = await getCurrentAppUser();
   if (!appUser) redirect("/login");
+
+  const company = toOne(appUser.companies);
+  const dict = await getDictionary(toLocale(company?.default_locale));
+  const t = dict.candidateProfile;
 
   const admin = createAdminClient();
 
@@ -36,7 +43,7 @@ export default async function CandidateProfilePage({
         href="/dashboard/candidates"
         className="text-sm text-muted-foreground underline"
       >
-        ← Voltar aos candidatos
+        {t.back}
       </Link>
       <h1 className="mt-4 text-2xl font-semibold tracking-tight">
         {candidate?.full_name}
@@ -46,12 +53,12 @@ export default async function CandidateProfilePage({
         {candidate?.phone ? ` · ${candidate.phone}` : ""}
       </p>
 
-      <h2 className="mt-8 text-lg font-medium">Candidaturas</h2>
+      <h2 className="mt-8 text-lg font-medium">{t.applications}</h2>
       <ul className="mt-4 flex flex-col gap-3">
         {applications.map((application) => {
           const job = toOne(application.jobs);
           const title =
-            job?.job_translations.find((t) => t.locale === "pt")?.title ??
+            job?.job_translations.find((tr) => tr.locale === "pt")?.title ??
             job?.job_translations[0]?.title ??
             "(vaga)";
           return (
@@ -65,7 +72,7 @@ export default async function CandidateProfilePage({
                     </span>
                   )}
                   <Badge variant={statusVariant(application.status)}>
-                    {application.status}
+                    {statusLabel(dict, application.status)}
                   </Badge>
                 </div>
               </div>
@@ -73,7 +80,7 @@ export default async function CandidateProfilePage({
                 href={`/dashboard/jobs/${application.job_id}#candidate-${application.id}`}
                 className="mt-2 inline-block text-sm font-medium text-primary underline"
               >
-                Ver na vaga →
+                {t.viewInJob}
               </Link>
             </Card>
           );

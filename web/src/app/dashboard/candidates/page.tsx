@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { statusLabel } from "@/lib/i18n/status-label";
 import { Card } from "@/components/ui/card";
 import { Badge, statusVariant } from "@/components/ui/badge";
 import { Input } from "@/components/ui/field";
@@ -25,6 +28,10 @@ export default async function CandidatesIndexPage({
 }) {
   const appUser = await getCurrentAppUser();
   if (!appUser) redirect("/login");
+
+  const company = toOne(appUser.companies);
+  const dict = await getDictionary(toLocale(company?.default_locale));
+  const t = dict.candidatesList;
 
   const { q } = await searchParams;
 
@@ -75,27 +82,25 @@ export default async function CandidatesIndexPage({
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Candidatos</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Todos os candidatos que já se candidataram a vagas da tua empresa.
-      </p>
+      <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
 
       <form action="/dashboard/candidates" className="mt-6 flex max-w-sm gap-2">
         <Input
           type="text"
           name="q"
           defaultValue={q ?? ""}
-          placeholder="Pesquisar por nome ou email..."
+          placeholder={t.searchPlaceholder}
         />
         <Button type="submit" variant="secondary" size="sm">
-          Pesquisar
+          {t.search}
         </Button>
       </form>
 
       <ul className="mt-6 flex flex-col gap-3">
         {candidates.length === 0 && (
           <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-            Nenhum candidato encontrado.
+            {t.noCandidatesFound}
           </Card>
         )}
         {candidates.map((candidate) => (
@@ -121,13 +126,13 @@ export default async function CandidatesIndexPage({
                 )}
                 <div className="mt-1">
                   <Badge variant={statusVariant(candidate.latestStatus)}>
-                    {candidate.latestStatus}
+                    {statusLabel(dict, candidate.latestStatus)}
                   </Badge>
                 </div>
               </div>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              {candidate.applicationCount} candidatura(s)
+              {candidate.applicationCount} {t.applicationsCount}
             </p>
           </Card>
         ))}

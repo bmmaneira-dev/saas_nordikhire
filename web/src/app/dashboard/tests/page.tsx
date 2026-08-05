@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { statusLabel } from "@/lib/i18n/status-label";
 import {
   TEST_CATEGORY_LABELS,
   RECOMMENDATION_LABELS,
@@ -21,13 +24,6 @@ const RECOMMENDATION_VARIANT: Record<
   not_applicable: "neutral",
 };
 
-const TABS = [
-  { key: "all", label: "Todos" },
-  { key: "technical", label: "Técnicos" },
-  { key: "behavioral", label: "Comportamentais" },
-  { key: "psychometric", label: "Psicométricos" },
-] as const;
-
 export default async function TestsIndexPage({
   searchParams,
 }: {
@@ -36,8 +32,19 @@ export default async function TestsIndexPage({
   const appUser = await getCurrentAppUser();
   if (!appUser) redirect("/login");
 
+  const company = toOne(appUser.companies);
+  const dict = await getDictionary(toLocale(company?.default_locale));
+  const t = dict.testsList;
+
+  const TABS = [
+    { key: "all", label: t.tabAll },
+    { key: "technical", label: t.tabTechnical },
+    { key: "behavioral", label: t.tabBehavioral },
+    { key: "psychometric", label: t.tabPsychometric },
+  ] as const;
+
   const { category } = await searchParams;
-  const activeTab = TABS.find((t) => t.key === category) ?? TABS[0];
+  const activeTab = TABS.find((tb) => tb.key === category) ?? TABS[0];
 
   const admin = createAdminClient();
   const { data: tests } = await admin
@@ -58,10 +65,8 @@ export default async function TestsIndexPage({
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Testes</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Todos os testes atribuídos a candidatos, em todas as vagas.
-      </p>
+      <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
 
       <div className="mt-6 flex gap-1 border-b border-surface-border">
         {TABS.map((tab) => (
@@ -82,7 +87,7 @@ export default async function TestsIndexPage({
       <ul className="mt-6 flex flex-col gap-3">
         {filtered.length === 0 && (
           <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-            Nenhum teste nesta categoria.
+            {t.noneInCategory}
           </Card>
         )}
         {filtered.map((test) => {
@@ -90,7 +95,7 @@ export default async function TestsIndexPage({
           const candidate = toOne(application?.candidates);
           const job = toOne(application?.jobs);
           const title =
-            job?.job_translations.find((t) => t.locale === "pt")?.title ??
+            job?.job_translations.find((tr) => tr.locale === "pt")?.title ??
             job?.job_translations[0]?.title;
           const resultRaw = test.result_raw as {
             category?: string;
@@ -122,7 +127,7 @@ export default async function TestsIndexPage({
                   )}
                   <div className="mt-1">
                     <Badge variant={statusVariant(test.status)}>
-                      {test.status}
+                      {statusLabel(dict, test.status)}
                     </Badge>
                   </div>
                 </div>

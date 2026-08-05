@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -16,6 +18,10 @@ export default async function MessagesIndexPage() {
   const appUser = await getCurrentAppUser();
   if (!appUser) redirect("/login");
 
+  const company = toOne(appUser.companies);
+  const dict = await getDictionary(toLocale(company?.default_locale));
+  const t = dict.messagesList;
+
   const admin = createAdminClient();
   const { data: messages } = await admin
     .from("candidate_feedback")
@@ -27,17 +33,13 @@ export default async function MessagesIndexPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Mensagens</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Histórico de feedback enviado a candidatos, em todas as vagas. Sem
-        WhatsApp ou email real ligados ainda — as mensagens ficam registadas
-        aqui e visíveis ao candidato na sua área.
-      </p>
+      <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
 
       <ul className="mt-6 flex flex-col gap-3">
         {(messages?.length ?? 0) === 0 && (
           <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-            Ainda não enviaste nenhuma mensagem.
+            {t.noneSent}
           </Card>
         )}
         {messages?.map((message) => {
