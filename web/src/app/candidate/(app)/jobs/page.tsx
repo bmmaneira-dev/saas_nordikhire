@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { Card } from "@/components/ui/card";
 import { Field, Input, Select } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
@@ -19,6 +21,9 @@ export default async function CandidateJobsSearchPage({
 }) {
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
+
+  const dict = await getDictionary(toLocale(candidate.preferred_locale));
+  const t = dict.candidateJobsSearch;
 
   const { q, location, workMode, seniority } = await searchParams;
 
@@ -49,51 +54,51 @@ export default async function CandidateJobsSearchPage({
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Explorar Vagas</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Pesquisa oportunidades abertas em todas as empresas do NordikHire.
+        {t.subtitle}
       </p>
 
       <form
         action="/candidate/jobs"
         className="mt-6 grid gap-3 sm:grid-cols-4"
       >
-        <Field label="Palavra-chave">
+        <Field label={t.fieldKeyword}>
           <Input
             type="text"
             name="q"
             defaultValue={q ?? ""}
-            placeholder="Ex: engenheiro backend"
+            placeholder={t.keywordPlaceholder}
           />
         </Field>
-        <Field label="Localização">
+        <Field label={t.fieldLocation}>
           <Input
             type="text"
             name="location"
             defaultValue={location ?? ""}
-            placeholder="Ex: Luanda"
+            placeholder={t.locationPlaceholder}
           />
         </Field>
-        <Field label="Modalidade">
+        <Field label={t.fieldWorkMode}>
           <Select name="workMode" defaultValue={workMode ?? ""}>
-            <option value="">Todas</option>
-            <option value="presencial">Presencial</option>
-            <option value="remoto">Remoto</option>
-            <option value="híbrido">Híbrido</option>
+            <option value="">{t.allOption}</option>
+            <option value="presencial">{t.workModeOnsite}</option>
+            <option value="remoto">{t.workModeRemote}</option>
+            <option value="híbrido">{t.workModeHybrid}</option>
           </Select>
         </Field>
-        <Field label="Senioridade">
+        <Field label={t.fieldSeniority}>
           <Select name="seniority" defaultValue={seniority ?? ""}>
-            <option value="">Todas</option>
-            <option value="junior">Júnior</option>
-            <option value="pleno">Pleno</option>
-            <option value="senior">Sénior</option>
-            <option value="lead">Lead</option>
+            <option value="">{t.allOption}</option>
+            <option value="junior">{t.seniorityJunior}</option>
+            <option value="pleno">{t.seniorityMid}</option>
+            <option value="senior">{t.senioritySenior}</option>
+            <option value="lead">{t.seniorityLead}</option>
           </Select>
         </Field>
         <div className="sm:col-span-4">
           <Button type="submit" size="sm">
-            Pesquisar
+            {t.search}
           </Button>
         </div>
       </form>
@@ -101,12 +106,12 @@ export default async function CandidateJobsSearchPage({
       <ul className="mt-6 flex flex-col gap-3">
         {(jobs?.length ?? 0) === 0 && (
           <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-            Nenhuma vaga encontrada com estes critérios.
+            {t.noJobsFound}
           </Card>
         )}
         {jobs?.map((job) => {
           const translation =
-            job.job_translations.find((t) => t.locale === "pt") ??
+            job.job_translations.find((tr) => tr.locale === "pt") ??
             job.job_translations[0];
           const company = toOne(job.companies);
           return (

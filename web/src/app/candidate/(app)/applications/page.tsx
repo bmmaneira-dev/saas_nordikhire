@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
+import { toLocale, toDateLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { statusLabel } from "@/lib/i18n/status-label";
 import { withdrawApplication } from "./actions";
 import { Card } from "@/components/ui/card";
 import { Badge, statusVariant } from "@/components/ui/badge";
@@ -19,6 +22,11 @@ const VIDEO_BUCKET = "application-videos";
 export default async function CandidateApplicationsPage() {
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
+
+  const locale = toLocale(candidate.preferred_locale);
+  const dict = await getDictionary(locale);
+  const t = dict.candidateApplications;
+  const dateLocale = toDateLocale(locale);
 
   const admin = createAdminClient();
   const { data: applications } = await admin
@@ -45,22 +53,22 @@ export default async function CandidateApplicationsPage() {
   return (
     <>
       <h1 className="text-2xl font-semibold tracking-tight">
-        As Minhas Candidaturas
+        {t.title}
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Acompanha o estado de todas as tuas candidaturas.
+        {t.subtitle}
       </p>
 
       <ul className="mt-6 flex flex-col gap-3">
         {(applications?.length ?? 0) === 0 && (
           <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-            Ainda não te candidataste a nenhuma vaga.
+            {t.noApplications}
           </Card>
         )}
         {applications?.map((application) => {
           const job = toOne(application.jobs);
           const translation =
-            job?.job_translations.find((t) => t.locale === "pt") ??
+            job?.job_translations.find((tr) => tr.locale === "pt") ??
             job?.job_translations[0];
           const company = toOne(job?.companies);
           const feedbackRows: FeedbackRow[] = Array.isArray(
@@ -85,22 +93,22 @@ export default async function CandidateApplicationsPage() {
                   </p>
                 </div>
                 <Badge variant={statusVariant(application.status)}>
-                  {application.status}
+                  {statusLabel(dict, application.status)}
                 </Badge>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                Candidataste-te em{" "}
-                {new Date(application.applied_at).toLocaleDateString("pt-PT")}
+                {t.appliedOn}{" "}
+                {new Date(application.applied_at).toLocaleDateString(dateLocale)}
                 {application.stage_updated_at &&
-                  ` · última actualização em ${new Date(
+                  ` · ${t.lastUpdateOn} ${new Date(
                     application.stage_updated_at
-                  ).toLocaleDateString("pt-PT")}`}
+                  ).toLocaleDateString(dateLocale)}`}
               </p>
 
               {application.video_url && videoUrlMap.get(application.video_url) && (
                 <div className="mt-3 border-t border-surface-border pt-3">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    O teu vídeo de apresentação
+                    {t.yourPresentationVideo}
                   </p>
                   <video
                     controls
@@ -113,7 +121,7 @@ export default async function CandidateApplicationsPage() {
               {feedbackHistory.length > 0 && (
                 <div className="mt-3 border-t border-surface-border pt-3">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Feedback da empresa
+                    {t.companyFeedback}
                   </p>
                   <ul className="mt-1 flex flex-col gap-1.5">
                     {feedbackHistory.map((fb, i) => (
@@ -129,7 +137,7 @@ export default async function CandidateApplicationsPage() {
                 <div className="mt-3 border-t border-surface-border pt-3">
                   <form action={withdrawApplication.bind(null, application.id)}>
                     <Button type="submit" variant="ghost" size="sm">
-                      Retirar candidatura
+                      {t.withdrawApplication}
                     </Button>
                   </form>
                 </div>

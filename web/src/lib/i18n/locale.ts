@@ -19,3 +19,14 @@ export function isSupportedLocale(
 export function toLocale(value: string | null | undefined): Locale {
   return isSupportedLocale(value) ? value : DEFAULT_LOCALE;
 }
+
+const DATE_LOCALE_MAP: Record<Locale, string> = {
+  pt: "pt-PT",
+  en: "en-US",
+  fr: "fr-FR",
+  es: "es-ES",
+};
+
+export function toDateLocale(locale: Locale): string {
+  return DATE_LOCALE_MAP[locale];
+}

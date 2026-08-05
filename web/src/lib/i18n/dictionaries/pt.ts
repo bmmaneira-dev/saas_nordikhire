@@ -341,6 +341,51 @@ export interface Dictionary {
     sending: string;
     sendAnswer: string;
   };
+  candidateJobsSearch: {
+    title: string;
+    subtitle: string;
+    fieldKeyword: string;
+    keywordPlaceholder: string;
+    fieldLocation: string;
+    locationPlaceholder: string;
+    fieldWorkMode: string;
+    allOption: string;
+    workModeOnsite: string;
+    workModeRemote: string;
+    workModeHybrid: string;
+    fieldSeniority: string;
+    seniorityJunior: string;
+    seniorityMid: string;
+    senioritySenior: string;
+    seniorityLead: string;
+    search: string;
+    noJobsFound: string;
+  };
+  candidateApplications: {
+    title: string;
+    subtitle: string;
+    noApplications: string;
+    appliedOn: string;
+    lastUpdateOn: string;
+    yourPresentationVideo: string;
+    companyFeedback: string;
+    withdrawApplication: string;
+  };
+  candidateProfilePage: {
+    title: string;
+    cvHeading: string;
+    cvBodyBefore: string;
+    cvLinkLabel: string;
+    cvBodyAfter: string;
+  };
+  candidateProfileForm: {
+    fullName: string;
+    phone: string;
+    linkedin: string;
+    updated: string;
+    saving: string;
+    save: string;
+  };
 }
 
 const pt: Dictionary = {
@@ -692,6 +737,53 @@ const pt: Dictionary = {
     chatPlaceholder: "Escreve a tua resposta...",
     sending: "A enviar...",
     sendAnswer: "Enviar resposta",
+  },
+  candidateJobsSearch: {
+    title: "Explorar Vagas",
+    subtitle: "Pesquisa oportunidades abertas em todas as empresas do NordikHire.",
+    fieldKeyword: "Palavra-chave",
+    keywordPlaceholder: "Ex: engenheiro backend",
+    fieldLocation: "Localização",
+    locationPlaceholder: "Ex: Luanda",
+    fieldWorkMode: "Modalidade",
+    allOption: "Todas",
+    workModeOnsite: "Presencial",
+    workModeRemote: "Remoto",
+    workModeHybrid: "Híbrido",
+    fieldSeniority: "Senioridade",
+    seniorityJunior: "Júnior",
+    seniorityMid: "Pleno",
+    senioritySenior: "Sénior",
+    seniorityLead: "Lead",
+    search: "Pesquisar",
+    noJobsFound: "Nenhuma vaga encontrada com estes critérios.",
+  },
+  candidateApplications: {
+    title: "As Minhas Candidaturas",
+    subtitle: "Acompanha o estado de todas as tuas candidaturas.",
+    noApplications: "Ainda não te candidataste a nenhuma vaga.",
+    appliedOn: "Candidataste-te em",
+    lastUpdateOn: "última actualização em",
+    yourPresentationVideo: "O teu vídeo de apresentação",
+    companyFeedback: "Feedback da empresa",
+    withdrawApplication: "Retirar candidatura",
+  },
+  candidateProfilePage: {
+    title: "O Meu Perfil",
+    cvHeading: "CV",
+    cvBodyBefore:
+      "Envias um CV de cada vez que te candidatas a uma vaga — consulta o histórico em",
+    cvLinkLabel: "As Minhas Candidaturas",
+    cvBodyAfter:
+      ". Um CV único e persistente no perfil, competências, formação, experiência e portefólio estruturados ficam para uma próxima fase.",
+  },
+  candidateProfileForm: {
+    fullName: "Nome completo",
+    phone: "Telefone",
+    linkedin: "LinkedIn",
+    updated: "Perfil actualizado.",
+    saving: "A guardar...",
+    save: "Guardar",
   },
 };
 

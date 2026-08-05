@@ -350,6 +350,53 @@ const fr: Dictionary = {
     sending: "Envoi...",
     sendAnswer: "Envoyer la réponse",
   },
+  candidateJobsSearch: {
+    title: "Explorer les offres",
+    subtitle: "Recherche les opportunités ouvertes dans toutes les entreprises NordikHire.",
+    fieldKeyword: "Mot-clé",
+    keywordPlaceholder: "Ex : ingénieur backend",
+    fieldLocation: "Localisation",
+    locationPlaceholder: "Ex : Luanda",
+    fieldWorkMode: "Mode de travail",
+    allOption: "Toutes",
+    workModeOnsite: "Sur site",
+    workModeRemote: "À distance",
+    workModeHybrid: "Hybride",
+    fieldSeniority: "Séniorité",
+    seniorityJunior: "Junior",
+    seniorityMid: "Confirmé",
+    senioritySenior: "Senior",
+    seniorityLead: "Lead",
+    search: "Rechercher",
+    noJobsFound: "Aucune offre trouvée avec ces critères.",
+  },
+  candidateApplications: {
+    title: "Mes candidatures",
+    subtitle: "Suis l'état de toutes tes candidatures.",
+    noApplications: "Tu n'as encore postulé à aucune offre.",
+    appliedOn: "Candidature envoyée le",
+    lastUpdateOn: "dernière mise à jour le",
+    yourPresentationVideo: "Ta vidéo de présentation",
+    companyFeedback: "Retour de l'entreprise",
+    withdrawApplication: "Retirer la candidature",
+  },
+  candidateProfilePage: {
+    title: "Mon profil",
+    cvHeading: "CV",
+    cvBodyBefore:
+      "Tu envoies un CV à chaque candidature — consulte l'historique dans",
+    cvLinkLabel: "Mes candidatures",
+    cvBodyAfter:
+      ". Un CV unique et permanent sur le profil, avec compétences, formation, expérience et portfolio structurés, arrivera dans une prochaine phase.",
+  },
+  candidateProfileForm: {
+    fullName: "Nom complet",
+    phone: "Téléphone",
+    linkedin: "LinkedIn",
+    updated: "Profil mis à jour.",
+    saving: "Enregistrement...",
+    save: "Enregistrer",
+  },
 };
 
 export default fr;

@@ -350,6 +350,53 @@ const en: Dictionary = {
     sending: "Sending...",
     sendAnswer: "Send answer",
   },
+  candidateJobsSearch: {
+    title: "Explore Jobs",
+    subtitle: "Search open opportunities across all NordikHire companies.",
+    fieldKeyword: "Keyword",
+    keywordPlaceholder: "E.g.: backend engineer",
+    fieldLocation: "Location",
+    locationPlaceholder: "E.g.: Luanda",
+    fieldWorkMode: "Work mode",
+    allOption: "All",
+    workModeOnsite: "On-site",
+    workModeRemote: "Remote",
+    workModeHybrid: "Hybrid",
+    fieldSeniority: "Seniority",
+    seniorityJunior: "Junior",
+    seniorityMid: "Mid-level",
+    senioritySenior: "Senior",
+    seniorityLead: "Lead",
+    search: "Search",
+    noJobsFound: "No jobs found matching these criteria.",
+  },
+  candidateApplications: {
+    title: "My Applications",
+    subtitle: "Track the status of all your applications.",
+    noApplications: "You haven't applied to any job yet.",
+    appliedOn: "Applied on",
+    lastUpdateOn: "last updated on",
+    yourPresentationVideo: "Your presentation video",
+    companyFeedback: "Feedback from the company",
+    withdrawApplication: "Withdraw application",
+  },
+  candidateProfilePage: {
+    title: "My Profile",
+    cvHeading: "CV",
+    cvBodyBefore:
+      "You upload a CV every time you apply to a job — check the history in",
+    cvLinkLabel: "My Applications",
+    cvBodyAfter:
+      ". A single, persistent CV on your profile, with structured skills, education, experience, and portfolio, is coming in a future phase.",
+  },
+  candidateProfileForm: {
+    fullName: "Full name",
+    phone: "Phone",
+    linkedin: "LinkedIn",
+    updated: "Profile updated.",
+    saving: "Saving...",
+    save: "Save",
+  },
 };
 
 export default en;
