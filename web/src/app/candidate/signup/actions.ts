@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toLocale } from "@/lib/i18n/locale";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function candidateSignup(_prevState: unknown, formData: FormData) {
   const fullName = String(formData.get("fullName") ?? "").trim();
@@ -22,6 +23,15 @@ export async function candidateSignup(_prevState: unknown, formData: FormData) {
     return {
       error: "É necessário aceitar o tratamento de dados pessoais.",
     };
+  }
+
+  const ip = await getClientIp();
+  const { allowed } = await checkRateLimit("candidate_signup", ip, {
+    maxAttempts: 5,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    return { error: "Demasiadas tentativas. Tenta novamente daqui a uma hora." };
   }
 
   const supabase = await createClient();

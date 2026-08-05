@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { scoreApplication } from "@/lib/cv-scoring";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const CV_BUCKET = "cvs";
 const VIDEO_BUCKET = "application-videos";
@@ -69,6 +70,17 @@ export async function applyToJob(
     return {
       error:
         "É necessário aceitar o tratamento de dados pessoais para te candidatares.",
+    };
+  }
+
+  const ip = await getClientIp();
+  const { allowed } = await checkRateLimit("job_application", ip, {
+    maxAttempts: 20,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    return {
+      error: "Demasiadas candidaturas enviadas recentemente. Tenta novamente mais tarde.",
     };
   }
 

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toLocale } from "@/lib/i18n/locale";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 function slugify(name: string) {
   const diacritics = new RegExp(
@@ -36,6 +37,15 @@ export async function signup(_prevState: unknown, formData: FormData) {
   }
   if (!consent) {
     return { error: "Tens de aceitar os Termos de Serviço e a Política de Privacidade." };
+  }
+
+  const ip = await getClientIp();
+  const { allowed } = await checkRateLimit("company_signup", ip, {
+    maxAttempts: 5,
+    windowMinutes: 60,
+  });
+  if (!allowed) {
+    return { error: "Demasiadas tentativas. Tenta novamente daqui a uma hora." };
   }
 
   const supabase = await createClient();
