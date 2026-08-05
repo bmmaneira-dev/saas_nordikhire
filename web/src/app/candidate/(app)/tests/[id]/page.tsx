@@ -2,6 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { PSYCHOMETRIC_DISCLAIMER } from "@/lib/skill-tests";
 import { Card } from "@/components/ui/card";
 import { TestForm } from "./test-form";
@@ -22,6 +24,9 @@ export default async function CandidateTestPage({
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
 
+  const dict = await getDictionary(toLocale(candidate.preferred_locale));
+  const t = dict.candidateTestPage;
+
   const admin = createAdminClient();
   const { data: assignment } = await admin
     .from("test_assignments")
@@ -38,7 +43,7 @@ export default async function CandidateTestPage({
 
   const job = toOne(application.jobs);
   const translation =
-    job?.job_translations.find((t: { locale: string }) => t.locale === "pt") ??
+    job?.job_translations.find((tr: { locale: string }) => tr.locale === "pt") ??
     job?.job_translations[0];
 
   const resultRaw = assignment.result_raw as {
@@ -53,7 +58,7 @@ export default async function CandidateTestPage({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
         <p className="text-sm text-muted-foreground">
-          {translation?.title ?? "Candidatura"}
+          {translation?.title ?? t.applicationFallback}
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">
           {assignment.test_name}
@@ -68,7 +73,7 @@ export default async function CandidateTestPage({
         {assignment.status === "completed" ? (
           <div className="mt-6">
             <div className="flex items-center gap-3">
-              <h2 className="text-lg font-medium">Resultado</h2>
+              <h2 className="text-lg font-medium">{t.result}</h2>
               {assignment.result_score != null && (
                 <span className="text-2xl font-semibold text-primary">
                   {Math.round(assignment.result_score)}
@@ -85,7 +90,7 @@ export default async function CandidateTestPage({
               {perQuestion.map((qf, i) => (
                 <Card key={i} className="px-5 py-4">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Pergunta {i + 1}
+                    {t.questionLabel} {i + 1}
                   </p>
                   <p className="mt-1 font-medium">{qf.question}</p>
                   <p className="mt-2 text-sm text-foreground/90">
@@ -97,7 +102,7 @@ export default async function CandidateTestPage({
             </ul>
           </div>
         ) : (
-          <TestForm assignmentId={assignment.id} questions={questions} />
+          <TestForm assignmentId={assignment.id} questions={questions} dict={dict} />
         )}
     </div>
   );

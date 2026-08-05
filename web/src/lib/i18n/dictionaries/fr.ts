@@ -397,6 +397,30 @@ const fr: Dictionary = {
     saving: "Enregistrement...",
     save: "Enregistrer",
   },
+  candidateTestsList: {
+    title: "Tests",
+    subtitle: "Tests qui t'ont été attribués dans des processus de candidature réels.",
+    noTests: "Tu n'as pas encore de tests attribués.",
+    viewResult: "Voir le résultat →",
+    takeTest: "Passer le test →",
+  },
+  candidateTestPage: {
+    applicationFallback: "Candidature",
+    result: "Résultat",
+    questionLabel: "Question",
+  },
+  candidateTestForm: {
+    evaluating: "Évaluation des réponses...",
+    submitTest: "Soumettre le test",
+  },
+  candidateInterviewsList: {
+    title: "Entretiens",
+    subtitle:
+      "Entretiens réels menés par IA au nom des entreprises auxquelles tu as postulé.",
+    noInterviews: "Tu n'as pas encore d'entretiens.",
+    viewInterview: "Voir l'entretien →",
+    continueInterview: "Continuer l'entretien →",
+  },
 };
 
 export default fr;

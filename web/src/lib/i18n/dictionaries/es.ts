@@ -397,6 +397,30 @@ const es: Dictionary = {
     saving: "Guardando...",
     save: "Guardar",
   },
+  candidateTestsList: {
+    title: "Pruebas",
+    subtitle: "Pruebas que te han sido asignadas en procesos reales de candidatura.",
+    noTests: "Todavía no tienes pruebas asignadas.",
+    viewResult: "Ver resultado →",
+    takeTest: "Hacer prueba →",
+  },
+  candidateTestPage: {
+    applicationFallback: "Candidatura",
+    result: "Resultado",
+    questionLabel: "Pregunta",
+  },
+  candidateTestForm: {
+    evaluating: "Evaluando respuestas...",
+    submitTest: "Enviar prueba",
+  },
+  candidateInterviewsList: {
+    title: "Entrevistas",
+    subtitle:
+      "Entrevistas reales realizadas por IA en nombre de las empresas a las que te postulaste.",
+    noInterviews: "Todavía no tienes entrevistas.",
+    viewInterview: "Ver entrevista →",
+    continueInterview: "Continuar entrevista →",
+  },
 };
 
 export default es;

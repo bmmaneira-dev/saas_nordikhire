@@ -397,6 +397,30 @@ const en: Dictionary = {
     saving: "Saving...",
     save: "Save",
   },
+  candidateTestsList: {
+    title: "Tests",
+    subtitle: "Tests assigned to you in real application processes.",
+    noTests: "You don't have any assigned tests yet.",
+    viewResult: "View result →",
+    takeTest: "Take test →",
+  },
+  candidateTestPage: {
+    applicationFallback: "Application",
+    result: "Result",
+    questionLabel: "Question",
+  },
+  candidateTestForm: {
+    evaluating: "Evaluating answers...",
+    submitTest: "Submit test",
+  },
+  candidateInterviewsList: {
+    title: "Interviews",
+    subtitle:
+      "Real AI-conducted interviews on behalf of the companies you applied to.",
+    noInterviews: "You don't have any interviews yet.",
+    viewInterview: "View interview →",
+    continueInterview: "Continue interview →",
+  },
 };
 
 export default en;

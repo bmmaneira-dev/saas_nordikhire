@@ -3,12 +3,18 @@ import { redirect } from "next/navigation";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { statusLabel } from "@/lib/i18n/status-label";
 import { Card } from "@/components/ui/card";
 import { Badge, statusVariant } from "@/components/ui/badge";
 
 export default async function CandidateTestsIndexPage() {
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
+
+  const dict = await getDictionary(toLocale(candidate.preferred_locale));
+  const t = dict.candidateTestsList;
 
   const admin = createAdminClient();
   const { data: tests } = await admin
@@ -21,22 +27,22 @@ export default async function CandidateTestsIndexPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Testes</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Testes que te foram atribuídos em processos reais de candidatura.
+        {t.subtitle}
       </p>
 
       <ul className="mt-6 flex flex-col gap-3">
         {(tests?.length ?? 0) === 0 && (
           <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-            Ainda não tens testes atribuídos.
+            {t.noTests}
           </Card>
         )}
         {tests?.map((test) => {
           const application = toOne(test.applications);
           const job = toOne(application?.jobs);
           const title =
-            job?.job_translations.find((t) => t.locale === "pt")?.title ??
+            job?.job_translations.find((tr) => tr.locale === "pt")?.title ??
             job?.job_translations[0]?.title;
           return (
             <Card key={test.id} className="px-5 py-4">
@@ -53,7 +59,7 @@ export default async function CandidateTestsIndexPage() {
                   )}
                   <div className="mt-1">
                     <Badge variant={statusVariant(test.status)}>
-                      {test.status}
+                      {statusLabel(dict, test.status)}
                     </Badge>
                   </div>
                 </div>
@@ -62,7 +68,7 @@ export default async function CandidateTestsIndexPage() {
                 href={`/candidate/tests/${test.id}`}
                 className="mt-2 inline-block text-sm font-medium text-primary underline"
               >
-                {test.status === "completed" ? "Ver resultado →" : "Fazer teste →"}
+                {test.status === "completed" ? t.viewResult : t.takeTest}
               </Link>
             </Card>
           );

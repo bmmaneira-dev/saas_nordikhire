@@ -386,6 +386,29 @@ export interface Dictionary {
     saving: string;
     save: string;
   };
+  candidateTestsList: {
+    title: string;
+    subtitle: string;
+    noTests: string;
+    viewResult: string;
+    takeTest: string;
+  };
+  candidateTestPage: {
+    applicationFallback: string;
+    result: string;
+    questionLabel: string;
+  };
+  candidateTestForm: {
+    evaluating: string;
+    submitTest: string;
+  };
+  candidateInterviewsList: {
+    title: string;
+    subtitle: string;
+    noInterviews: string;
+    viewInterview: string;
+    continueInterview: string;
+  };
 }
 
 const pt: Dictionary = {
@@ -784,6 +807,30 @@ const pt: Dictionary = {
     updated: "Perfil actualizado.",
     saving: "A guardar...",
     save: "Guardar",
+  },
+  candidateTestsList: {
+    title: "Testes",
+    subtitle: "Testes que te foram atribuídos em processos reais de candidatura.",
+    noTests: "Ainda não tens testes atribuídos.",
+    viewResult: "Ver resultado →",
+    takeTest: "Fazer teste →",
+  },
+  candidateTestPage: {
+    applicationFallback: "Candidatura",
+    result: "Resultado",
+    questionLabel: "Pergunta",
+  },
+  candidateTestForm: {
+    evaluating: "A avaliar respostas...",
+    submitTest: "Submeter teste",
+  },
+  candidateInterviewsList: {
+    title: "Entrevistas",
+    subtitle:
+      "Entrevistas reais conduzidas por IA em nome das empresas a que te candidataste.",
+    noInterviews: "Ainda não tens entrevistas.",
+    viewInterview: "Ver entrevista →",
+    continueInterview: "Continuar entrevista →",
   },
 };
 

@@ -3,12 +3,18 @@ import { redirect } from "next/navigation";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { statusLabel } from "@/lib/i18n/status-label";
 import { Card } from "@/components/ui/card";
 import { Badge, statusVariant } from "@/components/ui/badge";
 
 export default async function CandidateInterviewsIndexPage() {
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
+
+  const dict = await getDictionary(toLocale(candidate.preferred_locale));
+  const t = dict.candidateInterviewsList;
 
   const admin = createAdminClient();
   const { data: interviews } = await admin
@@ -21,16 +27,15 @@ export default async function CandidateInterviewsIndexPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Entrevistas</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">{t.title}</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Entrevistas reais conduzidas por IA em nome das empresas a que te
-        candidataste.
+        {t.subtitle}
       </p>
 
       <ul className="mt-6 flex flex-col gap-3">
         {(interviews?.length ?? 0) === 0 && (
           <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-            Ainda não tens entrevistas.
+            {t.noInterviews}
           </Card>
         )}
         {interviews?.map((interview) => {
@@ -38,7 +43,7 @@ export default async function CandidateInterviewsIndexPage() {
           const job = toOne(application?.jobs);
           const company = toOne(job?.companies);
           const title =
-            job?.job_translations.find((t) => t.locale === "pt")?.title ??
+            job?.job_translations.find((tr) => tr.locale === "pt")?.title ??
             job?.job_translations[0]?.title;
           return (
             <Card key={interview.id} className="px-5 py-4">
@@ -50,7 +55,7 @@ export default async function CandidateInterviewsIndexPage() {
                   </p>
                 </div>
                 <Badge variant={statusVariant(interview.status)}>
-                  {interview.status}
+                  {statusLabel(dict, interview.status)}
                 </Badge>
               </div>
               {interview.ai_summary && (
@@ -63,8 +68,8 @@ export default async function CandidateInterviewsIndexPage() {
                 className="mt-2 inline-block text-sm font-medium text-primary underline"
               >
                 {interview.status === "completed"
-                  ? "Ver entrevista →"
-                  : "Continuar entrevista →"}
+                  ? t.viewInterview
+                  : t.continueInterview}
               </Link>
             </Card>
           );
