@@ -28,13 +28,13 @@ const COMPANY_FEATURES: Feature[] = [
 
 const CANDIDATE_FEATURES: Feature[] = [
   {
-    label: "Optimização de perfil com IA",
+    label: "Optimização de perfil",
     icon: (
       <path d="M4 6a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6ZM9 15l2 2 4-4" />
     ),
   },
   {
-    label: "Simulador de entrevistas com IA",
+    label: "Simulador de entrevistas",
     icon: (
       <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" />
     ),
@@ -49,13 +49,13 @@ const COPY = {
   company: {
     tagline: ["Talento certo.", "Decisões melhores.", "Resultados reais."],
     subtitle:
-      "A plataforma de recrutamento baseada em dados e IA para empresas que querem ir mais longe.",
+      "A plataforma de recrutamento baseada em dados para empresas que querem ir mais longe.",
     features: COMPANY_FEATURES,
   },
   candidate: {
     tagline: ["Talento em destaque.", "Oportunidades reais.", "Carreira em movimento."],
     subtitle:
-      "Ferramentas de carreira com IA para candidatos que querem dar o próximo passo.",
+      "Ferramentas de carreira para candidatos que querem dar o próximo passo.",
     features: CANDIDATE_FEATURES,
   },
 } as const;
