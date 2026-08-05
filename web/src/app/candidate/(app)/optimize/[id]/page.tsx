@@ -4,12 +4,8 @@ import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { SectionFeedback } from "@/lib/profile-optimization";
 import { Card } from "@/components/ui/card";
-
-const SOURCE_LABELS: Record<string, string> = {
-  linkedin: "Perfil de LinkedIn",
-  cv: "CV",
-  other_platform: "Outra plataforma",
-};
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 
 export default async function OptimizationResultPage({
   params,
@@ -19,6 +15,15 @@ export default async function OptimizationResultPage({
   const { id } = await params;
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
+
+  const dict = await getDictionary(toLocale(candidate.preferred_locale));
+  const t = dict.candidateOptimizeResult;
+  const tn = dict.candidateOptimizeNew;
+  const SOURCE_LABELS: Record<string, string> = {
+    linkedin: tn.sourceLinkedin,
+    cv: tn.sourceCv,
+    other_platform: tn.sourceOtherPlatform,
+  };
 
   const admin = createAdminClient();
   const { data: optimization } = await admin
@@ -42,7 +47,7 @@ export default async function OptimizationResultPage({
           href="/candidate/development"
           className="text-sm text-muted-foreground underline"
         >
-          ← Voltar
+          {t.back}
         </Link>
         <p className="mt-4 text-sm text-muted-foreground">
           {optimization.source_label ||
@@ -51,7 +56,7 @@ export default async function OptimizationResultPage({
         </p>
         <div className="mt-1 flex items-center gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Força do perfil
+            {t.profileStrength}
           </h1>
           {optimization.overall_score != null && (
             <span className="text-2xl font-semibold text-primary">
@@ -69,7 +74,7 @@ export default async function OptimizationResultPage({
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {strengths.length > 0 && (
               <Card className="px-5 py-4">
-                <h2 className="text-sm font-medium text-success">Pontos fortes</h2>
+                <h2 className="text-sm font-medium text-success">{t.strengths}</h2>
                 <ul className="mt-2 flex flex-col gap-1.5 text-sm text-foreground/90">
                   {strengths.map((s, i) => (
                     <li key={i}>• {s}</li>
@@ -79,7 +84,7 @@ export default async function OptimizationResultPage({
             )}
             {weaknesses.length > 0 && (
               <Card className="px-5 py-4">
-                <h2 className="text-sm font-medium text-warning">A melhorar</h2>
+                <h2 className="text-sm font-medium text-warning">{t.weaknesses}</h2>
                 <ul className="mt-2 flex flex-col gap-1.5 text-sm text-foreground/90">
                   {weaknesses.map((w, i) => (
                     <li key={i}>• {w}</li>
@@ -92,7 +97,7 @@ export default async function OptimizationResultPage({
 
         {sectionFeedback.length > 0 && (
           <section className="mt-8">
-            <h2 className="text-lg font-medium">Sugestões por secção</h2>
+            <h2 className="text-lg font-medium">{t.sectionSuggestions}</h2>
             <ul className="mt-4 flex flex-col gap-4">
               {sectionFeedback.map((sf, i) => (
                 <Card key={i} className="px-5 py-4">
@@ -108,7 +113,7 @@ export default async function OptimizationResultPage({
                   {sf.suggested_rewrite && (
                     <div className="mt-3 border-t border-surface-border pt-3">
                       <p className="text-xs font-medium uppercase tracking-wide text-primary">
-                        Sugestão de reescrita
+                        {t.rewriteSuggestion}
                       </p>
                       <p className="mt-1 text-sm text-foreground">
                         {sf.suggested_rewrite}

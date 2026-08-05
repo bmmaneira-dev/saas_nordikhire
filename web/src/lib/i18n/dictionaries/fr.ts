@@ -421,6 +421,70 @@ const fr: Dictionary = {
     viewInterview: "Voir l'entretien →",
     continueInterview: "Continuer l'entretien →",
   },
+  candidatePracticeList: {
+    title: "Simulateur IA",
+    practiceInterview: "Pratiquer un entretien",
+    subtitle:
+      "Entraîne-toi pour de vrais entretiens avec un intervieweur simulé par IA — questions adaptées au poste, retour en temps réel, points forts et axes d'amélioration. Indépendant de toute candidature — jamais vu par une entreprise ni utilisé dans un processus de recrutement.",
+    noSessions: "Tu n'as encore pratiqué aucun entretien.",
+    viewEvaluation: "Voir l'évaluation →",
+    continueSession: "Continuer →",
+  },
+  candidatePracticeNew: {
+    back: "← Retour",
+    title: "Pratiquer un entretien",
+    subtitle:
+      "Décris le poste pour lequel tu veux t'entraîner et l'IA mène un entretien simulé, avec une évaluation à la fin.",
+    fieldTargetRole: "Poste visé",
+    targetRolePlaceholder: "Ex : Ingénieure logicielle backend",
+    fieldNotes: "Notes / axe de travail (optionnel)",
+    notesPlaceholder:
+      "Ex : je veux me concentrer sur les systèmes distribués et le leadership technique",
+    preparing: "Préparation...",
+    startPractice: "Commencer l'entretien de pratique",
+  },
+  candidatePracticeSession: {
+    practiceLabel: "Entretien de pratique",
+    evaluation: "Évaluation",
+    endAndEvaluate: "Terminer et générer l'évaluation",
+  },
+  candidatePracticeVoiceChat: {
+    cameraUnavailable: "Caméra indisponible — la pratique continue sans vidéo.",
+    cameraHint:
+      "Ta caméra sert uniquement à te voir répondre — elle n'est jamais enregistrée ni envoyée.",
+    chatPlaceholder: "Écris ou utilise le micro pour répondre...",
+    stopListening: "⏹ Arrêter",
+    speakAnswer: "🎤 Répondre à l'oral",
+    sending: "Envoi...",
+    sendAnswer: "Envoyer la réponse",
+    speechNotSupported:
+      "Ton navigateur ne prend pas en charge la reconnaissance vocale — utilise le texte.",
+  },
+  candidateOptimizeNew: {
+    back: "← Retour",
+    title: "Optimiser le profil ou le CV",
+    subtitle:
+      "Colle le texte de ton profil LinkedIn, CV ou autre plateforme et reçois un retour et des suggestions de réécriture, section par section. Outil personnel — indépendant de toute candidature ou entreprise.",
+    fieldSourceType: "Type de contenu",
+    sourceLinkedin: "Profil LinkedIn",
+    sourceCv: "CV",
+    sourceOtherPlatform: "Autre plateforme",
+    fieldSourceLabel: "Nom de la plateforme (optionnel)",
+    sourceLabelPlaceholder: "Ex : LinkedIn, Indeed, Portail d'emploi X",
+    fieldInputText: "Texte du profil / CV",
+    inputTextPlaceholder:
+      "Colle le texte ici — accroche, résumé, expérience, compétences...",
+    analyzing: "Analyse...",
+    analyzeAndImprove: "Analyser et améliorer",
+  },
+  candidateOptimizeResult: {
+    back: "← Retour",
+    profileStrength: "Force du profil",
+    strengths: "Points forts",
+    weaknesses: "À améliorer",
+    sectionSuggestions: "Suggestions par section",
+    rewriteSuggestion: "Suggestion de réécriture",
+  },
 };
 
 export default fr;

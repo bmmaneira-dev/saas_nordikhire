@@ -421,6 +421,70 @@ const en: Dictionary = {
     viewInterview: "View interview →",
     continueInterview: "Continue interview →",
   },
+  candidatePracticeList: {
+    title: "AI Simulator",
+    practiceInterview: "Practice interview",
+    subtitle:
+      "Train for real interviews with an AI-simulated interviewer — questions tailored to the role, real-time feedback, strengths and areas to improve. Independent of any application — never seen by any company or used in any hiring process.",
+    noSessions: "You haven't practiced any interview yet.",
+    viewEvaluation: "View evaluation →",
+    continueSession: "Continue →",
+  },
+  candidatePracticeNew: {
+    back: "← Back",
+    title: "Practice interview",
+    subtitle:
+      "Describe the role you want to train for and the AI will conduct a simulated interview, with an evaluation at the end.",
+    fieldTargetRole: "Target role",
+    targetRolePlaceholder: "E.g.: Backend Software Engineer",
+    fieldNotes: "Notes / focus (optional)",
+    notesPlaceholder:
+      "E.g.: I want to focus on distributed systems and technical leadership questions",
+    preparing: "Preparing...",
+    startPractice: "Start practice interview",
+  },
+  candidatePracticeSession: {
+    practiceLabel: "Practice interview",
+    evaluation: "Evaluation",
+    endAndEvaluate: "End and generate evaluation",
+  },
+  candidatePracticeVoiceChat: {
+    cameraUnavailable: "Camera unavailable — practice continues without video.",
+    cameraHint:
+      "Your camera is only so you can see yourself answering — it's never recorded or sent anywhere.",
+    chatPlaceholder: "Type or use the microphone to answer...",
+    stopListening: "⏹ Stop",
+    speakAnswer: "🎤 Speak answer",
+    sending: "Sending...",
+    sendAnswer: "Send answer",
+    speechNotSupported:
+      "Your browser doesn't support speech recognition — use text instead.",
+  },
+  candidateOptimizeNew: {
+    back: "← Back",
+    title: "Optimize profile or CV",
+    subtitle:
+      "Paste the text of your LinkedIn profile, CV, or other platform and get feedback and rewrite suggestions, section by section. A personal tool — independent of any application or company.",
+    fieldSourceType: "Content type",
+    sourceLinkedin: "LinkedIn profile",
+    sourceCv: "CV",
+    sourceOtherPlatform: "Other platform",
+    fieldSourceLabel: "Platform name (optional)",
+    sourceLabelPlaceholder: "E.g.: LinkedIn, Indeed, Job Board X",
+    fieldInputText: "Profile / CV text",
+    inputTextPlaceholder:
+      "Paste the text here — headline, summary, experience, skills...",
+    analyzing: "Analyzing...",
+    analyzeAndImprove: "Analyze and improve",
+  },
+  candidateOptimizeResult: {
+    back: "← Back",
+    profileStrength: "Profile strength",
+    strengths: "Strengths",
+    weaknesses: "To improve",
+    sectionSuggestions: "Section-by-section suggestions",
+    rewriteSuggestion: "Rewrite suggestion",
+  },
 };
 
 export default en;

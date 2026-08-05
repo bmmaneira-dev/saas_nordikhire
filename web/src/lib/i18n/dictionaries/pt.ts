@@ -409,6 +409,63 @@ export interface Dictionary {
     viewInterview: string;
     continueInterview: string;
   };
+  candidatePracticeList: {
+    title: string;
+    practiceInterview: string;
+    subtitle: string;
+    noSessions: string;
+    viewEvaluation: string;
+    continueSession: string;
+  };
+  candidatePracticeNew: {
+    back: string;
+    title: string;
+    subtitle: string;
+    fieldTargetRole: string;
+    targetRolePlaceholder: string;
+    fieldNotes: string;
+    notesPlaceholder: string;
+    preparing: string;
+    startPractice: string;
+  };
+  candidatePracticeSession: {
+    practiceLabel: string;
+    evaluation: string;
+    endAndEvaluate: string;
+  };
+  candidatePracticeVoiceChat: {
+    cameraUnavailable: string;
+    cameraHint: string;
+    chatPlaceholder: string;
+    stopListening: string;
+    speakAnswer: string;
+    sending: string;
+    sendAnswer: string;
+    speechNotSupported: string;
+  };
+  candidateOptimizeNew: {
+    back: string;
+    title: string;
+    subtitle: string;
+    fieldSourceType: string;
+    sourceLinkedin: string;
+    sourceCv: string;
+    sourceOtherPlatform: string;
+    fieldSourceLabel: string;
+    sourceLabelPlaceholder: string;
+    fieldInputText: string;
+    inputTextPlaceholder: string;
+    analyzing: string;
+    analyzeAndImprove: string;
+  };
+  candidateOptimizeResult: {
+    back: string;
+    profileStrength: string;
+    strengths: string;
+    weaknesses: string;
+    sectionSuggestions: string;
+    rewriteSuggestion: string;
+  };
 }
 
 const pt: Dictionary = {
@@ -831,6 +888,70 @@ const pt: Dictionary = {
     noInterviews: "Ainda não tens entrevistas.",
     viewInterview: "Ver entrevista →",
     continueInterview: "Continuar entrevista →",
+  },
+  candidatePracticeList: {
+    title: "Simulador IA",
+    practiceInterview: "Praticar entrevista",
+    subtitle:
+      "Treina para entrevistas reais com um entrevistador simulado por IA — perguntas personalizadas para o cargo, feedback em tempo real, pontos fortes e a melhorar. Independente de qualquer candidatura — nunca visto por nenhuma empresa nem usado em nenhum processo de selecção.",
+    noSessions: "Ainda não praticaste nenhuma entrevista.",
+    viewEvaluation: "Ver avaliação →",
+    continueSession: "Continuar →",
+  },
+  candidatePracticeNew: {
+    back: "← Voltar",
+    title: "Praticar entrevista",
+    subtitle:
+      "Descreve o cargo que queres treinar e a IA conduz uma entrevista simulada, com uma avaliação no final.",
+    fieldTargetRole: "Cargo-alvo",
+    targetRolePlaceholder: "Ex: Engenheira de Software Backend",
+    fieldNotes: "Notas / foco (opcional)",
+    notesPlaceholder:
+      "Ex: quero focar em perguntas de sistemas distribuídos e liderança técnica",
+    preparing: "A preparar...",
+    startPractice: "Começar entrevista de prática",
+  },
+  candidatePracticeSession: {
+    practiceLabel: "Prática de entrevista",
+    evaluation: "Avaliação",
+    endAndEvaluate: "Terminar e gerar avaliação",
+  },
+  candidatePracticeVoiceChat: {
+    cameraUnavailable: "Câmara não disponível — a prática continua sem vídeo.",
+    cameraHint:
+      "A tua câmara é só para te veres a responder — nunca é gravada nem enviada.",
+    chatPlaceholder: "Escreve ou usa o microfone para responder...",
+    stopListening: "⏹ Parar",
+    speakAnswer: "🎤 Falar resposta",
+    sending: "A enviar...",
+    sendAnswer: "Enviar resposta",
+    speechNotSupported:
+      "O teu browser não suporta reconhecimento de voz — usa o texto.",
+  },
+  candidateOptimizeNew: {
+    back: "← Voltar",
+    title: "Otimizar perfil ou CV",
+    subtitle:
+      "Cola o texto do teu perfil de LinkedIn, CV ou outra plataforma e recebe feedback e sugestões de reescrita, secção a secção. Ferramenta pessoal — independente de qualquer candidatura ou empresa.",
+    fieldSourceType: "Tipo de conteúdo",
+    sourceLinkedin: "Perfil de LinkedIn",
+    sourceCv: "CV",
+    sourceOtherPlatform: "Outra plataforma",
+    fieldSourceLabel: "Nome da plataforma (opcional)",
+    sourceLabelPlaceholder: "Ex: LinkedIn, Indeed, Portal de Emprego X",
+    fieldInputText: "Texto do perfil / CV",
+    inputTextPlaceholder:
+      "Cola aqui o texto — headline, resumo, experiência, competências...",
+    analyzing: "A analisar...",
+    analyzeAndImprove: "Analisar e melhorar",
+  },
+  candidateOptimizeResult: {
+    back: "← Voltar",
+    profileStrength: "Força do perfil",
+    strengths: "Pontos fortes",
+    weaknesses: "A melhorar",
+    sectionSuggestions: "Sugestões por secção",
+    rewriteSuggestion: "Sugestão de reescrita",
   },
 };
 

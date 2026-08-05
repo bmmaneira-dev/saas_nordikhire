@@ -5,6 +5,8 @@ import type { TranscriptTurn } from "@/lib/ai-interview";
 import { PracticeVoiceChat } from "./voice-chat";
 import { endPractice } from "../actions";
 import { Button } from "@/components/ui/button";
+import { toLocale, toDateLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 
 interface Evaluation {
   communication: number;
@@ -22,6 +24,12 @@ export default async function PracticeSessionPage({
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
 
+  const locale = toLocale(candidate.preferred_locale);
+  const dict = await getDictionary(locale);
+  const t = dict.candidatePracticeSession;
+  const te = dict.interviewEvaluation;
+  const speechLocale = toDateLocale(locale);
+
   const admin = createAdminClient();
   const { data: practice } = await admin
     .from("candidate_interview_practice")
@@ -38,7 +46,7 @@ export default async function PracticeSessionPage({
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
-        <p className="text-sm text-muted-foreground">Prática de entrevista</p>
+        <p className="text-sm text-muted-foreground">{t.practiceLabel}</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">
           {practice.target_role}
         </h1>
@@ -65,17 +73,17 @@ export default async function PracticeSessionPage({
             </div>
 
             <section className="mt-8 border-t border-surface-border pt-6">
-              <h2 className="text-lg font-medium">Avaliação</h2>
+              <h2 className="text-lg font-medium">{t.evaluation}</h2>
               {evaluation && (
                 <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                  <span>Comunicação: {evaluation.communication}</span>
+                  <span>{te.communication}: {evaluation.communication}</span>
                   <span>
-                    Profundidade técnica: {evaluation.technical_depth}
+                    {te.technicalDepth}: {evaluation.technical_depth}
                   </span>
                   <span>
-                    Resolução de problemas: {evaluation.problem_solving}
+                    {te.problemSolving}: {evaluation.problem_solving}
                   </span>
-                  <span>Adequação cultural: {evaluation.cultural_fit}</span>
+                  <span>{te.culturalFit}: {evaluation.cultural_fit}</span>
                 </div>
               )}
               {practice.ai_summary && (
@@ -91,6 +99,8 @@ export default async function PracticeSessionPage({
               <PracticeVoiceChat
                 practiceId={practice.id}
                 transcript={transcript}
+                dict={dict}
+                speechLocale={speechLocale}
               />
             </div>
             <form
@@ -98,7 +108,7 @@ export default async function PracticeSessionPage({
               className="mt-4"
             >
               <Button type="submit" variant="ghost" size="sm">
-                Terminar e gerar avaliação
+                {t.endAndEvaluate}
               </Button>
             </form>
           </>

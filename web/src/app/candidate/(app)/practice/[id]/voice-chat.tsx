@@ -5,26 +5,35 @@ import { sendPracticeMessage } from "../actions";
 import type { TranscriptTurn } from "@/lib/ai-interview";
 import { Textarea } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 // Preferimos vozes que tendem a soar menos robóticas (motores "Natural" /
 // "Neural" / "Google" costumam ser bem melhores que a voz por omissão do
-// sistema), e priorizamos português quando existir.
-function pickVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
+// sistema), e priorizamos o idioma da entrevista quando existir.
+function pickVoice(
+  voices: SpeechSynthesisVoice[],
+  langPrefix: string
+): SpeechSynthesisVoice | null {
   if (voices.length === 0) return null;
   const preferredNameHints = ["Natural", "Neural", "Google", "Online"];
   const scoreOf = (v: SpeechSynthesisVoice) =>
     (preferredNameHints.some((hint) => v.name.includes(hint)) ? 2 : 0) +
-    (v.lang.toLowerCase().startsWith("pt") ? 1 : 0);
+    (v.lang.toLowerCase().startsWith(langPrefix) ? 1 : 0);
   return [...voices].sort((a, b) => scoreOf(b) - scoreOf(a))[0];
 }
 
 export function PracticeVoiceChat({
   practiceId,
   transcript,
+  dict,
+  speechLocale,
 }: {
   practiceId: string;
   transcript: TranscriptTurn[];
+  dict: Dictionary;
+  speechLocale: string;
 }) {
+  const t = dict.candidatePracticeVoiceChat;
   const boundAction = sendPracticeMessage.bind(null, practiceId);
   const [state, formAction, pending] = useActionState(boundAction, undefined);
   const formRef = useRef<HTMLFormElement>(null);
@@ -49,12 +58,12 @@ export function PracticeVoiceChat({
         if (videoRef.current) videoRef.current.srcObject = s;
       })
       .catch(() => {
-        setCameraError("Câmara não disponível — a prática continua sem vídeo.");
+        setCameraError(t.cameraUnavailable);
       });
     return () => {
-      stream?.getTracks().forEach((t) => t.stop());
+      stream?.getTracks().forEach((track) => track.stop());
     };
-  }, []);
+  }, [t.cameraUnavailable]);
 
   // Fala a última pergunta da IA em voz alta assim que aparece no histórico.
   useEffect(() => {
@@ -65,11 +74,14 @@ export function PracticeVoiceChat({
     if (last.role !== "ai") return;
 
     const utterance = new SpeechSynthesisUtterance(last.text);
-    utterance.lang = "pt-PT";
+    utterance.lang = speechLocale;
     utterance.rate = 0.98;
     utterance.pitch = 1.03;
     const speak = () => {
-      const voice = pickVoice(window.speechSynthesis.getVoices());
+      const voice = pickVoice(
+        window.speechSynthesis.getVoices(),
+        speechLocale.split("-")[0]
+      );
       if (voice) utterance.voice = voice;
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utterance);
@@ -80,7 +92,7 @@ export function PracticeVoiceChat({
     } else {
       speak();
     }
-  }, [transcript]);
+  }, [transcript, speechLocale]);
 
   useEffect(() => {
     if (state?.success) {
@@ -102,7 +114,7 @@ export function PracticeVoiceChat({
     }
 
     const recognition = new SpeechRecognitionCtor();
-    recognition.lang = "pt-PT";
+    recognition.lang = speechLocale;
     recognition.interimResults = true;
     recognition.continuous = true;
 
@@ -151,8 +163,7 @@ export function PracticeVoiceChat({
           className="h-32 w-44 shrink-0 rounded-xl bg-surface-muted object-cover"
         />
         <p className="text-xs text-muted-foreground">
-          {cameraError ??
-            "A tua câmara é só para te veres a responder — nunca é gravada nem enviada."}
+          {cameraError ?? t.cameraHint}
         </p>
       </div>
 
@@ -162,7 +173,7 @@ export function PracticeVoiceChat({
           name="message"
           rows={3}
           required
-          placeholder="Escreve ou usa o microfone para responder..."
+          placeholder={t.chatPlaceholder}
         />
         <div className="flex items-center gap-3">
           <Button
@@ -171,15 +182,15 @@ export function PracticeVoiceChat({
             size="sm"
             onClick={toggleListening}
           >
-            {listening ? "⏹ Parar" : "🎤 Falar resposta"}
+            {listening ? t.stopListening : t.speakAnswer}
           </Button>
           <Button type="submit" size="sm" disabled={pending}>
-            {pending ? "A enviar..." : "Enviar resposta"}
+            {pending ? t.sending : t.sendAnswer}
           </Button>
         </div>
         {!speechSupported && (
           <p className="text-xs text-muted-foreground">
-            O teu browser não suporta reconhecimento de voz — usa o texto.
+            {t.speechNotSupported}
           </p>
         )}
         {state?.error && <p className="text-sm text-danger">{state.error}</p>}

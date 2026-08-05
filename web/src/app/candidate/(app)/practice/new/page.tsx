@@ -1,53 +1,14 @@
-"use client";
+import { redirect } from "next/navigation";
+import { getCurrentCandidate } from "@/lib/current-candidate";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { PracticeForm } from "./practice-form";
 
-import Link from "next/link";
-import { useActionState } from "react";
-import { startPractice } from "../actions";
-import { Field, Input, Textarea } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
+export default async function NewPracticePage() {
+  const candidate = await getCurrentCandidate();
+  if (!candidate) redirect("/candidate/login");
 
-export default function NewPracticePage() {
-  const [state, formAction, pending] = useActionState(startPractice, undefined);
+  const dict = await getDictionary(toLocale(candidate.preferred_locale));
 
-  return (
-    <div className="mx-auto flex w-full max-w-xl flex-col">
-        <Link
-          href="/candidate/practice"
-          className="text-sm text-muted-foreground underline"
-        >
-          ← Voltar
-        </Link>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight">
-          Praticar entrevista
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Descreve o cargo que queres treinar e a IA conduz uma entrevista
-          simulada, com uma avaliação no final.
-        </p>
-
-        <form action={formAction} className="mt-8 flex flex-col gap-4">
-          <Field label="Cargo-alvo">
-            <Input
-              type="text"
-              name="targetRole"
-              required
-              placeholder="Ex: Engenheira de Software Backend"
-            />
-          </Field>
-          <Field label="Notas / foco (opcional)">
-            <Textarea
-              name="notes"
-              rows={4}
-              placeholder="Ex: quero focar em perguntas de sistemas distribuídos e liderança técnica"
-            />
-          </Field>
-
-          {state?.error && <p className="text-sm text-danger">{state.error}</p>}
-
-          <Button type="submit" disabled={pending} className="mt-2 self-start">
-            {pending ? "A preparar..." : "Começar entrevista de prática"}
-          </Button>
-        </form>
-    </div>
-  );
+  return <PracticeForm dict={dict} />;
 }

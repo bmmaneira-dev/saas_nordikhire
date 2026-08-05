@@ -2,6 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentCandidate } from "@/lib/current-candidate";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import { statusLabel } from "@/lib/i18n/status-label";
 import { Card } from "@/components/ui/card";
 import { Badge, statusVariant } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
@@ -9,6 +12,9 @@ import { ButtonLink } from "@/components/ui/button";
 export default async function CandidatePracticeIndexPage() {
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
+
+  const dict = await getDictionary(toLocale(candidate.preferred_locale));
+  const t = dict.candidatePracticeList;
 
   const admin = createAdminClient();
   const { data: sessions } = await admin
@@ -21,23 +27,20 @@ export default async function CandidatePracticeIndexPage() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">
-          Simulador IA
+          {t.title}
         </h1>
         <ButtonLink href="/candidate/practice/new" size="sm">
-          Praticar entrevista
+          {t.practiceInterview}
         </ButtonLink>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        Treina para entrevistas reais com um entrevistador simulado por IA —
-        perguntas personalizadas para o cargo, feedback em tempo real, pontos
-        fortes e a melhorar. Independente de qualquer candidatura — nunca
-        visto por nenhuma empresa nem usado em nenhum processo de selecção.
+        {t.subtitle}
       </p>
 
       <ul className="mt-6 flex flex-col gap-3">
         {(sessions?.length ?? 0) === 0 && (
           <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-            Ainda não praticaste nenhuma entrevista.
+            {t.noSessions}
           </Card>
         )}
         {sessions?.map((session) => (
@@ -45,14 +48,14 @@ export default async function CandidatePracticeIndexPage() {
             <div className="flex items-center justify-between">
               <span className="font-medium">{session.target_role}</span>
               <Badge variant={statusVariant(session.status)}>
-                {session.status}
+                {statusLabel(dict, session.status)}
               </Badge>
             </div>
             <Link
               href={`/candidate/practice/${session.id}`}
               className="mt-2 inline-block text-sm font-medium text-primary underline"
             >
-              {session.status === "completed" ? "Ver avaliação →" : "Continuar →"}
+              {session.status === "completed" ? t.viewEvaluation : t.continueSession}
             </Link>
           </Card>
         ))}

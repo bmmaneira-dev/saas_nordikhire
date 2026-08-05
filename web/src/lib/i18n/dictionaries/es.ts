@@ -421,6 +421,70 @@ const es: Dictionary = {
     viewInterview: "Ver entrevista →",
     continueInterview: "Continuar entrevista →",
   },
+  candidatePracticeList: {
+    title: "Simulador IA",
+    practiceInterview: "Practicar entrevista",
+    subtitle:
+      "Entrena para entrevistas reales con un entrevistador simulado por IA — preguntas personalizadas para el puesto, comentarios en tiempo real, puntos fuertes y a mejorar. Independiente de cualquier candidatura — nunca visto por ninguna empresa ni usado en ningún proceso de selección.",
+    noSessions: "Todavía no has practicado ninguna entrevista.",
+    viewEvaluation: "Ver evaluación →",
+    continueSession: "Continuar →",
+  },
+  candidatePracticeNew: {
+    back: "← Volver",
+    title: "Practicar entrevista",
+    subtitle:
+      "Describe el puesto que quieres entrenar y la IA realiza una entrevista simulada, con una evaluación al final.",
+    fieldTargetRole: "Puesto objetivo",
+    targetRolePlaceholder: "Ej: Ingeniera de Software Backend",
+    fieldNotes: "Notas / enfoque (opcional)",
+    notesPlaceholder:
+      "Ej: quiero centrarme en preguntas de sistemas distribuidos y liderazgo técnico",
+    preparing: "Preparando...",
+    startPractice: "Comenzar entrevista de práctica",
+  },
+  candidatePracticeSession: {
+    practiceLabel: "Práctica de entrevista",
+    evaluation: "Evaluación",
+    endAndEvaluate: "Terminar y generar evaluación",
+  },
+  candidatePracticeVoiceChat: {
+    cameraUnavailable: "Cámara no disponible — la práctica continúa sin vídeo.",
+    cameraHint:
+      "Tu cámara es solo para que te veas respondiendo — nunca se graba ni se envía.",
+    chatPlaceholder: "Escribe o usa el micrófono para responder...",
+    stopListening: "⏹ Parar",
+    speakAnswer: "🎤 Hablar respuesta",
+    sending: "Enviando...",
+    sendAnswer: "Enviar respuesta",
+    speechNotSupported:
+      "Tu navegador no admite reconocimiento de voz — usa el texto.",
+  },
+  candidateOptimizeNew: {
+    back: "← Volver",
+    title: "Optimizar perfil o CV",
+    subtitle:
+      "Pega el texto de tu perfil de LinkedIn, CV u otra plataforma y recibe comentarios y sugerencias de reescritura, sección por sección. Herramienta personal — independiente de cualquier candidatura o empresa.",
+    fieldSourceType: "Tipo de contenido",
+    sourceLinkedin: "Perfil de LinkedIn",
+    sourceCv: "CV",
+    sourceOtherPlatform: "Otra plataforma",
+    fieldSourceLabel: "Nombre de la plataforma (opcional)",
+    sourceLabelPlaceholder: "Ej: LinkedIn, Indeed, Portal de Empleo X",
+    fieldInputText: "Texto del perfil / CV",
+    inputTextPlaceholder:
+      "Pega aquí el texto — titular, resumen, experiencia, habilidades...",
+    analyzing: "Analizando...",
+    analyzeAndImprove: "Analizar y mejorar",
+  },
+  candidateOptimizeResult: {
+    back: "← Volver",
+    profileStrength: "Fortaleza del perfil",
+    strengths: "Puntos fuertes",
+    weaknesses: "A mejorar",
+    sectionSuggestions: "Sugerencias por sección",
+    rewriteSuggestion: "Sugerencia de reescritura",
+  },
 };
 
 export default es;
