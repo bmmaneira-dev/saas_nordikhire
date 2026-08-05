@@ -131,7 +131,7 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
               >
                 Talento certo.
                 <br />
-                Decisões melhores.
+                Melhores decisões.
               </h1>
               <p
                 className="mt-4 max-w-md text-base"

@@ -632,6 +632,20 @@ create table blocked_identities (
 );
 create unique index idx_blocked_identity on blocked_identities(identity_type, identity_value);
 
+-- Rate limiting de formulários públicos e acções que chamam a Anthropic API
+-- (login, candidatura, entrevista simulada, testes, etc.) — cada tentativa
+-- fica registada aqui; a contagem de tentativas numa janela de tempo corre
+-- na aplicação (lib/rate-limit.ts), esta tabela só guarda os eventos brutos.
+-- Sem company_id/candidate_id: "key" é o identificador do bucket (IP, email,
+-- company_id ou candidate_id conforme o caso), não uma referência a tenant.
+create table rate_limit_hits (
+    id                  uuid primary key default gen_random_uuid(),
+    bucket                text not null,                  -- ex: 'login_ip', 'interview_message'
+    key                    text not null,                  -- identificador dentro do bucket (IP, email, id, etc.)
+    created_at              timestamptz default now()
+);
+create index rate_limit_hits_lookup_idx on rate_limit_hits(bucket, key, created_at);
+
 -- ============================================================================
 -- 16. ONBOARDING — progresso guiado para empresas e candidatos
 -- ============================================================================
@@ -860,6 +874,7 @@ alter table blocked_identities enable row level security;
 alter table company_onboarding_progress enable row level security;
 alter table candidate_subscriptions enable row level security;
 alter table candidate_interview_practice enable row level security;
+alter table rate_limit_hits enable row level security;
 
 -- Catálogos públicos: qualquer utilizador autenticado pode ler, só o
 -- service_role escreve (gestão de planos/providers é administrativa).
@@ -979,8 +994,8 @@ create policy user_owns_auth_sessions on auth_sessions
 -- funcionalidade fica desactivada na interface até haver massa crítica de
 -- dados; só o service_role (backend) lhe deve tocar por agora.
 --
--- blocked_identities: idem — tabela de segurança interna, nunca exposta a
--- utilizadores finais, só ao service_role.
+-- blocked_identities, rate_limit_hits: idem — tabelas de segurança interna,
+-- nunca expostas a utilizadores finais, só ao service_role.
 -- ============================================================================
 -- NOTAS DE IMPLEMENTAÇÃO
 -- ============================================================================
