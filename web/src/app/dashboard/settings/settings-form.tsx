@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { updateCompanyProfile } from "./actions";
 import { Field, Input, Select } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 const INDUSTRIES = [
   "Tecnologia",
@@ -23,23 +24,26 @@ export function SettingsForm({
   industry,
   country,
   logoUrl,
+  dict,
 }: {
   name: string;
   industry: string;
   country: string;
   logoUrl: string;
+  dict: Dictionary;
 }) {
   const [state, formAction, pending] = useActionState(
     updateCompanyProfile,
     undefined
   );
+  const t = dict.settingsForm;
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <Field label="Nome da empresa">
+      <Field label={t.companyName}>
         <Input type="text" name="name" required defaultValue={name} />
       </Field>
-      <Field label="Sector de actividade">
+      <Field label={t.industry}>
         <Select name="industry" defaultValue={industry}>
           <option value="">—</option>
           {INDUSTRIES.map((option) => (
@@ -49,7 +53,7 @@ export function SettingsForm({
           ))}
         </Select>
       </Field>
-      <Field label="País (código ISO)">
+      <Field label={t.country}>
         <Input
           type="text"
           name="country"
@@ -58,7 +62,7 @@ export function SettingsForm({
           placeholder="AO"
         />
       </Field>
-      <Field label="URL do logótipo (opcional)">
+      <Field label={t.logoUrl}>
         <Input
           type="url"
           name="logoUrl"
@@ -69,11 +73,11 @@ export function SettingsForm({
 
       {state?.error && <p className="text-sm text-danger">{state.error}</p>}
       {state?.success && (
-        <p className="text-sm text-success">Perfil actualizado.</p>
+        <p className="text-sm text-success">{t.updated}</p>
       )}
 
       <Button type="submit" disabled={pending} className="mt-2 self-start">
-        {pending ? "A guardar..." : "Guardar"}
+        {pending ? t.saving : t.save}
       </Button>
     </form>
   );

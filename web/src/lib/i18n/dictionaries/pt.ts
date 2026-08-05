@@ -195,6 +195,69 @@ export interface Dictionary {
     pipelineLabel: string;
     bodyAfter: string;
   };
+  team: {
+    backToCompany: string;
+    title: string;
+    subtitle: string;
+    inviteTeammate: string;
+    inviteNote: string;
+    pendingInvites: string;
+    revoke: string;
+    teamMembers: string;
+    you: string;
+    active: string;
+    inactive: string;
+    deactivate: string;
+    reactivate: string;
+  };
+  inviteForm: {
+    email: string;
+    emailPlaceholder: string;
+    fullName: string;
+    role: string;
+    inviting: string;
+    invite: string;
+    successMessage: string;
+  };
+  billing: {
+    backToCompany: string;
+    title: string;
+    plan: string;
+    trialDaysLeft: string;
+    trialEnded: string;
+    activeJobs: string;
+    teamMembers: string;
+    activeApplications: string;
+    unlimited: string;
+    plans: string;
+    plansSubtitle: string;
+    currentPlan: string;
+    switchToThisPlan: string;
+    priceOnRequest: string;
+    perMonth: string;
+    statusTrialing: string;
+    statusActive: string;
+    statusPastDue: string;
+    statusCanceled: string;
+    featureAiScoring: string;
+    featureAiInterview: string;
+    featureWhatsapp: string;
+    featureMarketTrends: string;
+  };
+  settingsPage: {
+    backToCompany: string;
+    title: string;
+    adminOnly: string;
+  };
+  settingsForm: {
+    companyName: string;
+    industry: string;
+    country: string;
+    logoUrl: string;
+    updated: string;
+    saving: string;
+    save: string;
+  };
 }
 
 const pt: Dictionary = {
@@ -396,6 +459,71 @@ const pt: Dictionary = {
     bodyMiddle: "já mostra os KPIs principais e a",
     pipelineLabel: "Pipeline",
     bodyAfter: "dá uma vista visual do funil por etapa.",
+  },
+  team: {
+    backToCompany: "← Voltar à empresa",
+    title: "Equipa",
+    subtitle: "Gere quem tem acesso ao dashboard da tua empresa.",
+    inviteTeammate: "Convidar colega",
+    inviteNote:
+      "Ainda não temos envio de email — copia o link gerado e envia directamente ao colega.",
+    pendingInvites: "Convites pendentes",
+    revoke: "Revogar",
+    teamMembers: "Membros da equipa",
+    you: "(tu)",
+    active: "activo",
+    inactive: "inactivo",
+    deactivate: "Desactivar",
+    reactivate: "Reactivar",
+  },
+  inviteForm: {
+    email: "Email",
+    emailPlaceholder: "colega@empresa.com",
+    fullName: "Nome (opcional)",
+    role: "Papel",
+    inviting: "A convidar...",
+    invite: "Convidar",
+    successMessage: "Convite criado — copia o link abaixo e envia ao colega.",
+  },
+  billing: {
+    backToCompany: "← Voltar à empresa",
+    title: "Facturação",
+    plan: "Plano",
+    trialDaysLeft: "dia(s) restantes no período de teste.",
+    trialEnded: "O período de teste terminou.",
+    activeJobs: "Vagas activas",
+    teamMembers: "Membros da equipa",
+    activeApplications: "Candidaturas activas",
+    unlimited: "ilimitado",
+    plans: "Planos",
+    plansSubtitle:
+      "Facturação manual nesta fase — mudar de plano actualiza o limite de imediato, a factura é tratada directamente com a equipa NordikHire.",
+    currentPlan: "Plano actual",
+    switchToThisPlan: "Mudar para este plano",
+    priceOnRequest: "Sob consulta",
+    perMonth: "/mês",
+    statusTrialing: "Em período de teste",
+    statusActive: "Activa",
+    statusPastDue: "Pagamento em atraso",
+    statusCanceled: "Cancelada",
+    featureAiScoring: "Scoring de CV por IA",
+    featureAiInterview: "Entrevista simulada por IA",
+    featureWhatsapp: "Candidaturas via WhatsApp",
+    featureMarketTrends: "Tendências de mercado",
+  },
+  settingsPage: {
+    backToCompany: "← Voltar à empresa",
+    title: "Perfil da empresa",
+    adminOnly: "Só administradores podem editar o perfil da empresa.",
+  },
+  settingsForm: {
+    companyName: "Nome da empresa",
+    industry: "Sector de actividade",
+    country: "País (código ISO)",
+    logoUrl: "URL do logótipo (opcional)",
+    updated: "Perfil actualizado.",
+    saving: "A guardar...",
+    save: "Guardar",
   },
 };
 

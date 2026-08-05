@@ -4,14 +4,18 @@ import { useActionState, useRef, useEffect } from "react";
 import { inviteTeammate } from "./actions";
 import { Field, Input, Select } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 export function InviteForm({
   roles,
+  dict,
 }: {
   roles: { id: string; name: string }[];
+  dict: Dictionary;
 }) {
   const [state, formAction, pending] = useActionState(inviteTeammate, undefined);
   const formRef = useRef<HTMLFormElement>(null);
+  const t = dict.inviteForm;
 
   useEffect(() => {
     if (state?.success) formRef.current?.reset();
@@ -24,17 +28,17 @@ export function InviteForm({
       className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-3"
     >
       <div className="flex-1">
-        <Field label="Email">
-          <Input type="email" name="email" required placeholder="colega@empresa.com" />
+        <Field label={t.email}>
+          <Input type="email" name="email" required placeholder={t.emailPlaceholder} />
         </Field>
       </div>
       <div className="flex-1">
-        <Field label="Nome (opcional)">
+        <Field label={t.fullName}>
           <Input type="text" name="fullName" />
         </Field>
       </div>
       <div>
-        <Field label="Papel">
+        <Field label={t.role}>
           <Select name="roleId" defaultValue={roles.find((r) => r.name === "Recrutador")?.id}>
             {roles.map((role) => (
               <option key={role.id} value={role.id}>
@@ -45,14 +49,14 @@ export function InviteForm({
         </Field>
       </div>
       <Button type="submit" disabled={pending} className="shrink-0">
-        {pending ? "A convidar..." : "Convidar"}
+        {pending ? t.inviting : t.invite}
       </Button>
       {state?.error && (
         <p className="w-full text-sm text-danger">{state.error}</p>
       )}
       {state?.success && (
         <p className="w-full text-sm text-success">
-          Convite criado — copia o link abaixo e envia ao colega.
+          {t.successMessage}
         </p>
       )}
     </form>

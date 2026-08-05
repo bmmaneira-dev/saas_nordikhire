@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { revokeInvite, setTeammateActive } from "./actions";
 import { InviteForm } from "./invite-form";
 import { Card } from "@/components/ui/card";
@@ -26,6 +28,10 @@ export default async function TeamPage() {
 
   const currentRole = toOne(appUser.roles);
   const isAdmin = currentRole?.name === "Admin";
+
+  const company = toOne(appUser.companies);
+  const dict = await getDictionary(toLocale(company?.default_locale));
+  const t = dict.team;
 
   const admin = createAdminClient();
 
@@ -75,29 +81,26 @@ export default async function TeamPage() {
           href="/dashboard/company"
           className="text-sm text-muted-foreground underline"
         >
-          ← Voltar à empresa
+          {t.backToCompany}
         </Link>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight">Equipa</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Gere quem tem acesso ao dashboard da tua empresa.
-        </p>
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight">{t.title}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p>
 
         {isAdmin && (
           <section className="mt-8">
-            <h2 className="text-lg font-medium">Convidar colega</h2>
+            <h2 className="text-lg font-medium">{t.inviteTeammate}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Ainda não temos envio de email — copia o link gerado e envia
-              directamente ao colega.
+              {t.inviteNote}
             </p>
             <div className="mt-4">
-              <InviteForm roles={roles ?? []} />
+              <InviteForm roles={roles ?? []} dict={dict} />
             </div>
           </section>
         )}
 
         {isAdmin && invites && invites.length > 0 && (
           <section className="mt-10">
-            <h2 className="text-lg font-medium">Convites pendentes</h2>
+            <h2 className="text-lg font-medium">{t.pendingInvites}</h2>
             <ul className="mt-4 flex flex-col gap-3">
               {invites.map((invite) => {
                 const role = toOne(invite.roles);
@@ -115,7 +118,7 @@ export default async function TeamPage() {
                       </div>
                       <form action={revokeInvite.bind(null, invite.id)}>
                         <Button type="submit" variant="ghost" size="sm">
-                          Revogar
+                          {t.revoke}
                         </Button>
                       </form>
                     </div>
@@ -130,7 +133,7 @@ export default async function TeamPage() {
         )}
 
         <section className="mt-10">
-          <h2 className="text-lg font-medium">Membros da equipa</h2>
+          <h2 className="text-lg font-medium">{t.teamMembers}</h2>
           <ul className="mt-4 flex flex-col gap-3">
             {teammates?.map((teammate) => {
               const role = toOne(teammate.roles);
@@ -143,7 +146,7 @@ export default async function TeamPage() {
                         {teammate.full_name}
                         {isSelf && (
                           <span className="ml-2 text-xs text-muted-foreground">
-                            (tu)
+                            {t.you}
                           </span>
                         )}
                       </p>
@@ -153,7 +156,7 @@ export default async function TeamPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant={teammate.is_active ? "success" : "neutral"}>
-                        {teammate.is_active ? "activo" : "inactivo"}
+                        {teammate.is_active ? t.active : t.inactive}
                       </Badge>
                       {isAdmin && !isSelf && (
                         <form
@@ -164,7 +167,7 @@ export default async function TeamPage() {
                           )}
                         >
                           <Button type="submit" variant="ghost" size="sm">
-                            {teammate.is_active ? "Desactivar" : "Reactivar"}
+                            {teammate.is_active ? t.deactivate : t.reactivate}
                           </Button>
                         </form>
                       )}
