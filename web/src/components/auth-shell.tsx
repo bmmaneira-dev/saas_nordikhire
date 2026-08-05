@@ -49,7 +49,7 @@ const COPY = {
   company: {
     tagline: ["Talento certo.", "Decisões melhores.", "Resultados reais."],
     subtitle:
-      "A plataforma de recrutamento baseada em dados para empresas que querem ir mais longe.",
+      "Cada contratação é uma oportunidade para construir uma equipa mais forte.",
     features: COMPANY_FEATURES,
   },
   candidate: {
