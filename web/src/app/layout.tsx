@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     default: "NordikHire",
     template: "%s · NordikHire",
   },
-  description: "Plataforma de recrutamento inteligente com IA",
+  description: "Plataforma de recrutamento inteligente",
 };
 
 export default function RootLayout({

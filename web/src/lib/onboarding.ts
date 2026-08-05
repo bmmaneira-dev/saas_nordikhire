@@ -67,9 +67,9 @@ export async function getOnboardingSteps(
     },
     {
       key: "integrations_reviewed",
-      label: "Explora as ferramentas de IA",
+      label: "Explora as ferramentas automáticas",
       description:
-        "Conhece o scoring de CV, entrevistas simuladas e testes gerados por IA.",
+        "Conhece o scoring de CV, as entrevistas simuladas e os testes gerados automaticamente.",
       href: "/dashboard/billing",
       done: !!progressResult.data,
     },

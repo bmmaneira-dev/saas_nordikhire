@@ -21,7 +21,7 @@ function formatPlanPriceUsd(plan: PlanInfo): string | null {
 
 const RECRUITER_FEATURES = [
   {
-    title: "Scoring de CVs com IA",
+    title: "Scoring automático de CVs",
     body: "Cada candidatura é lida e pontuada automaticamente contra os requisitos da vaga, com justificação incluída.",
     icon: (
       <path d="M9 12h6M9 16h6M9 8h1M4 6a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Z" />
@@ -29,8 +29,8 @@ const RECRUITER_FEATURES = [
     accent: true,
   },
   {
-    title: "Entrevistas simuladas por IA",
-    body: "Um entrevistador de IA conduz a primeira conversa e entrega uma avaliação estruturada no final.",
+    title: "Entrevistas simuladas",
+    body: "A primeira conversa é conduzida automaticamente, com uma avaliação estruturada entregue no final.",
     icon: (
       <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" />
     ),
@@ -38,17 +38,17 @@ const RECRUITER_FEATURES = [
   },
   {
     title: "Testes técnicos e comportamentais",
-    body: "Gera testes à medida da vaga, com correção e recomendação automáticas.",
+    body: "Gera testes à medida da vaga, com correcção e recomendação automáticas.",
     icon: <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />,
   },
   {
-    title: "Deteção de sinais de risco",
+    title: "Detecção de sinais de risco",
     body: "Inconsistências e lacunas no percurso do candidato são sinalizadas antes da entrevista.",
     icon: <path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />,
   },
   {
     title: "Pipeline visual por etapa",
-    body: "Acompanha cada candidatura da receção à contratação, num quadro único por vaga.",
+    body: "Acompanha cada candidatura da recepção à contratação, num quadro único por vaga.",
     icon: <path d="M4 20V10M10 20V4M16 20v-7M4 20h16" />,
   },
   {
@@ -60,7 +60,7 @@ const RECRUITER_FEATURES = [
 
 const CANDIDATE_FEATURES = [
   {
-    title: "Otimização de perfil com IA",
+    title: "Optimização de perfil",
     body: "Cola o teu LinkedIn ou CV e recebe feedback secção a secção, com sugestões de reescrita.",
   },
   {
@@ -79,8 +79,8 @@ const CANDIDATE_FEATURES = [
 
 const STEPS = [
   { verb: "Publica a vaga", body: "Cria a vaga em minutos e partilha o link ou o código QR gerado automaticamente." },
-  { verb: "A IA analisa cada CV", body: "As candidaturas chegam já pontuadas e ordenadas pelo ajuste ao cargo." },
-  { verb: "Entrevistas e testes automáticos", body: "A IA conduz a primeira entrevista e aplica os testes que escolheres." },
+  { verb: "Cada CV é analisado automaticamente", body: "As candidaturas chegam já pontuadas e ordenadas pelo ajuste ao cargo." },
+  { verb: "Entrevistas e testes automáticos", body: "A primeira entrevista é conduzida automaticamente, com os testes que escolheres já aplicados." },
   { verb: "Decide com contexto completo", body: "Compara candidatos lado a lado antes de avançar ou recusar." },
 ];
 
@@ -137,8 +137,8 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
                 className="mt-4 max-w-md text-base"
                 style={{ color: "var(--hero-muted)" }}
               >
-                Recrutamento com IA: triagem de CVs, entrevistas simuladas,
-                testes técnicos e gestão de equipa, tudo num só lugar.
+                Triagem automática de CVs, entrevistas simuladas, testes
+                técnicos e gestão de equipa, tudo num só lugar.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <ButtonLink href="/signup" size="md">
@@ -202,8 +202,9 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
                     Contrata mais depressa, com mais confiança.
                   </h3>
                   <p className="mt-3 text-sm text-muted-foreground">
-                    Deixa a IA tratar da triagem inicial e concentra a tua
-                    equipa nas decisões que só pessoas conseguem tomar.
+                    Deixa a triagem inicial ser feita automaticamente e
+                    concentra a tua equipa nas decisões que só pessoas
+                    conseguem tomar.
                   </p>
                   <Link
                     href="/signup"
@@ -225,7 +226,7 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
                     Chega mais preparado a cada entrevista.
                   </h3>
                   <p className="mt-3 text-sm text-muted-foreground">
-                    Otimiza o teu perfil, pratica entrevistas com IA e
+                    Optimiza o teu perfil, pratica entrevistas simuladas e
                     acompanha todas as tuas candidaturas num só lugar.
                   </p>
                   <Link
@@ -365,7 +366,7 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
               </h2>
               <p className="mt-3 max-w-lg text-sm text-muted-foreground">
                 Começa com 14 dias grátis. Muda de plano quando quiseres,
-                diretamente no teu painel.
+                directamente no teu painel.
               </p>
             </Reveal>
             <div className="mt-10 grid gap-6 md:grid-cols-3">
@@ -398,7 +399,7 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
                       <ul className="mt-6 flex flex-col gap-2 text-sm text-muted-foreground">
                         <li>
                           {plan.max_active_jobs ?? "Vagas ilimitadas"}
-                          {plan.max_active_jobs != null ? " vagas ativas" : ""}
+                          {plan.max_active_jobs != null ? " vagas activas" : ""}
                         </li>
                         <li>
                           {plan.max_users ?? "Utilizadores ilimitados"}
@@ -407,12 +408,12 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
                         <li>
                           {plan.max_active_applications ?? "Candidaturas ilimitadas"}
                           {plan.max_active_applications != null
-                            ? " candidaturas ativas"
+                            ? " candidaturas activas"
                             : ""}
                         </li>
-                        {plan.features.ai_scoring && <li>Scoring de CVs com IA</li>}
+                        {plan.features.ai_scoring && <li>Scoring automático de CVs</li>}
                         {plan.features.ai_interview && (
-                          <li>Entrevistas simuladas por IA</li>
+                          <li>Entrevistas simuladas</li>
                         )}
                       </ul>
                       <ButtonLink

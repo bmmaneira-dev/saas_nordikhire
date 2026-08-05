@@ -16,7 +16,7 @@ export const TEST_CATEGORY_LABELS: Record<TestCategory, string> = {
 // estatisticamente. É um sinal indicativo gerado por IA, não um substituto
 // para um teste psicométrico a sério — ver REGRA DE GOVERNANÇA no schema.
 export const PSYCHOMETRIC_DISCLAIMER =
-  "Sinal indicativo gerado por IA — não é um teste psicométrico validado cientificamente. Para avaliação psicométrica formal, liga um provider especializado (ex: SHL, Hogan, Thomas) em Configurações > Integrações.";
+  "Sinal indicativo gerado automaticamente — não é um teste psicométrico validado cientificamente. Para avaliação psicométrica formal, liga um provider especializado (ex: SHL, Hogan, Thomas) em Configurações > Integrações.";
 
 export interface JobContext {
   title: string;

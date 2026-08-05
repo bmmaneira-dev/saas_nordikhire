@@ -87,7 +87,7 @@ export default function PrivacyPolicyPage() {
       <section>
         <h2 className="text-lg font-semibold text-foreground">6. Quanto tempo guardamos os dados</h2>
         <p className="mt-2">
-          Mantemos os teus dados enquanto a tua conta estiver ativa. Podes
+          Mantemos os teus dados enquanto a tua conta estiver activa. Podes
           pedir a eliminação da tua conta e dos dados associados a qualquer
           momento, sujeito a obrigações legais de conservação que possam
           aplicar-se a registos de candidatura já partilhados com uma
@@ -118,7 +118,7 @@ export default function PrivacyPolicyPage() {
       <section>
         <h2 className="text-lg font-semibold text-foreground">9. Alterações a esta política</h2>
         <p className="mt-2">
-          Podemos atualizar esta política periodicamente. Alterações
+          Podemos actualizar esta política periodicamente. Alterações
           relevantes serão comunicadas dentro da plataforma antes de entrarem
           em vigor.
         </p>

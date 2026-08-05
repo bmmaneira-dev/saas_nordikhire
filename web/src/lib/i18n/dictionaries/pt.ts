@@ -500,7 +500,7 @@ const pt: Dictionary = {
     profile: "O Meu Perfil",
     tests: "Testes",
     interviews: "Entrevistas",
-    practice: "Simulador IA",
+    practice: "Simulador de Entrevistas",
     messages: "Mensagens",
     development: "Desenvolvimento Profissional",
   },
@@ -633,7 +633,7 @@ const pt: Dictionary = {
   },
   interviewsList: {
     title: "Entrevistas",
-    subtitle: "Todas as entrevistas simuladas por IA, em todas as vagas.",
+    subtitle: "Todas as entrevistas simuladas, em todas as vagas.",
     noneYet: "Ainda não há entrevistas.",
     viewInJob: "Ver na vaga →",
   },
@@ -666,7 +666,7 @@ const pt: Dictionary = {
     title: "Banco de Talentos",
     subtitle: "Candidatos que podem ser reutilizados em futuras vagas.",
     bodyBefore:
-      "Pesquisa por competências, talent pools organizados por área, e recomendações da IA de candidatos anteriores adequados a novas vagas. Entretanto, usa a secção",
+      "Pesquisa por competências, talent pools organizados por área, e recomendações automáticas de candidatos anteriores adequados a novas vagas. Entretanto, usa a secção",
     linkLabel: "Candidatos",
     bodyAfter: "para pesquisar todos os candidatos que já se candidataram.",
   },
@@ -726,8 +726,8 @@ const pt: Dictionary = {
     statusActive: "Activa",
     statusPastDue: "Pagamento em atraso",
     statusCanceled: "Cancelada",
-    featureAiScoring: "Scoring de CV por IA",
-    featureAiInterview: "Entrevista simulada por IA",
+    featureAiScoring: "Scoring automático de CV",
+    featureAiInterview: "Entrevista simulada",
     featureWhatsapp: "Candidaturas via WhatsApp",
     featureMarketTrends: "Tendências de mercado",
   },
@@ -750,8 +750,8 @@ const pt: Dictionary = {
     viewPublicPage: "Ver página pública →",
     addTranslation: "+ Adicionar tradução",
     chooseLanguage: "Escolhe um idioma",
-    translateWithAi: "Traduzir com IA",
-    machineTranslatedSuffix: " · IA",
+    translateWithAi: "Traduzir automaticamente",
+    machineTranslatedSuffix: " · Automático",
     comparisonSummary: "Resumo comparativo",
     colCandidate: "Candidato",
     colScore: "Score",
@@ -770,8 +770,8 @@ const pt: Dictionary = {
     testsHeading: "Testes",
     viewAnswersEvaluation: "Ver respostas e avaliação",
     viewInterviewEvaluation: "Ver entrevista e avaliação →",
-    continueAiInterview: "Continuar entrevista IA →",
-    startAiInterview: "Iniciar entrevista com IA",
+    continueAiInterview: "Continuar entrevista simulada →",
+    startAiInterview: "Iniciar entrevista simulada",
     advanceTo: "Avançar para:",
     reject: "Rejeitar",
     rejectionPlaceholder: "Motivo / feedback para o candidato (opcional)",
@@ -785,7 +785,7 @@ const pt: Dictionary = {
   },
   feedbackComposer: {
     generating: "A gerar...",
-    generateDraftAi: "✨ Gerar rascunho com IA",
+    generateDraftAi: "✨ Gerar rascunho automaticamente",
   },
   reportSection: {
     title: "Relatório de desenvolvimento",
@@ -823,7 +823,7 @@ const pt: Dictionary = {
     processingCvs: "A processar CVs...",
   },
   interviewPage: {
-    aiInterviewWith: "Entrevista com IA —",
+    aiInterviewWith: "Entrevista simulada —",
     evaluation: "Avaliação",
     endInterview: "Terminar entrevista e gerar avaliação",
     chatPlaceholder: "Escreve a tua resposta...",
@@ -896,16 +896,16 @@ const pt: Dictionary = {
   candidateInterviewsList: {
     title: "Entrevistas",
     subtitle:
-      "Entrevistas reais conduzidas por IA em nome das empresas a que te candidataste.",
+      "Entrevistas reais conduzidas automaticamente em nome das empresas a que te candidataste.",
     noInterviews: "Ainda não tens entrevistas.",
     viewInterview: "Ver entrevista →",
     continueInterview: "Continuar entrevista →",
   },
   candidatePracticeList: {
-    title: "Simulador IA",
+    title: "Simulador de Entrevistas",
     practiceInterview: "Praticar entrevista",
     subtitle:
-      "Treina para entrevistas reais com um entrevistador simulado por IA — perguntas personalizadas para o cargo, feedback em tempo real, pontos fortes e a melhorar. Independente de qualquer candidatura — nunca visto por nenhuma empresa nem usado em nenhum processo de selecção.",
+      "Treina para entrevistas reais com uma entrevista simulada — perguntas personalizadas para o cargo, feedback em tempo real, pontos fortes e a melhorar. Independente de qualquer candidatura — nunca visto por nenhuma empresa nem usado em nenhum processo de selecção.",
     noSessions: "Ainda não praticaste nenhuma entrevista.",
     viewEvaluation: "Ver avaliação →",
     continueSession: "Continuar →",
@@ -914,7 +914,7 @@ const pt: Dictionary = {
     back: "← Voltar",
     title: "Praticar entrevista",
     subtitle:
-      "Descreve o cargo que queres treinar e a IA conduz uma entrevista simulada, com uma avaliação no final.",
+      "Descreve o cargo que queres treinar e a plataforma conduz uma entrevista simulada, com uma avaliação no final.",
     fieldTargetRole: "Cargo-alvo",
     targetRolePlaceholder: "Ex: Engenheira de Software Backend",
     fieldNotes: "Notas / foco (opcional)",
@@ -942,7 +942,7 @@ const pt: Dictionary = {
   },
   candidateOptimizeNew: {
     back: "← Voltar",
-    title: "Otimizar perfil ou CV",
+    title: "Optimizar perfil ou CV",
     subtitle:
       "Cola o texto do teu perfil de LinkedIn, CV ou outra plataforma e recebe feedback e sugestões de reescrita, secção a secção. Ferramenta pessoal — independente de qualquer candidatura ou empresa.",
     fieldSourceType: "Tipo de conteúdo",

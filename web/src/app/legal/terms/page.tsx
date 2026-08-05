@@ -32,7 +32,7 @@ export default function TermsOfServicePage() {
           entre outras funcionalidades: publicação de vagas, análise e
           pontuação de candidaturas com recurso a inteligência artificial,
           entrevistas e testes técnicos simulados por IA, gestão de pipeline
-          de candidatos, e ferramentas de otimização de perfil e prática de
+          de candidatos, e ferramentas de optimização de perfil e prática de
           entrevistas para candidatos.
         </p>
         <p className="mt-2">
@@ -48,8 +48,8 @@ export default function TermsOfServicePage() {
         <h2 className="text-lg font-semibold text-foreground">3. Contas e responsabilidades</h2>
         <p className="mt-2">
           És responsável por manter a confidencialidade da tua password e por
-          toda a atividade realizada na tua conta. Deves fornecer informação
-          verdadeira no registo e mantê-la atualizada. Contas de empresa são
+          toda a actividade realizada na tua conta. Deves fornecer informação
+          verdadeira no registo e mantê-la actualizada. Contas de empresa são
           responsáveis por garantir que têm base legal para tratar os dados
           pessoais dos candidatos que introduzem na plataforma.
         </p>
@@ -67,12 +67,12 @@ export default function TermsOfServicePage() {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-foreground">5. Planos e faturação</h2>
+        <h2 className="text-lg font-semibold text-foreground">5. Planos e facturação</h2>
         <p className="mt-2">
           Novas contas de empresa começam com um período de avaliação
           gratuito. Após esse período, a continuação do acesso a
-          funcionalidades pagas depende de um plano ativo. Nesta fase, a
-          faturação é feita manualmente em coordenação direta com a nossa
+          funcionalidades pagas depende de um plano activo. Nesta fase, a
+          facturação é feita manualmente em coordenação directa com a nossa
           equipa, não existe cobrança automática por cartão de crédito.
         </p>
       </section>
@@ -113,7 +113,7 @@ export default function TermsOfServicePage() {
       <section>
         <h2 className="text-lg font-semibold text-foreground">9. Alterações a estes Termos</h2>
         <p className="mt-2">
-          Podemos atualizar estes Termos periodicamente. Alterações
+          Podemos actualizar estes Termos periodicamente. Alterações
           relevantes serão comunicadas dentro da plataforma antes de entrarem
           em vigor.
         </p>

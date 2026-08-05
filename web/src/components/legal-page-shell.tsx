@@ -26,7 +26,7 @@ export function LegalPageShell({
         {title}
       </h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Última atualização: {updatedAt}
+        Última actualização: {updatedAt}
       </p>
 
       <div className="prose-legal mt-8 flex flex-col gap-6 text-sm leading-relaxed text-foreground/90">
