@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { generateFeedbackDraft } from "./actions";
 import { Textarea } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 export function FeedbackComposer({
   applicationId,
@@ -14,6 +15,7 @@ export function FeedbackComposer({
   placeholder,
   submitLabel,
   submitVariant,
+  dict,
 }: {
   applicationId: string;
   jobId: string;
@@ -23,10 +25,12 @@ export function FeedbackComposer({
   placeholder: string;
   submitLabel: string;
   submitVariant: "danger" | "secondary";
+  dict: Dictionary;
 }) {
   const [text, setText] = useState("");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const t = dict.feedbackComposer;
 
   function handleGenerate() {
     setError(null);
@@ -58,7 +62,7 @@ export function FeedbackComposer({
         disabled={pending}
         className="self-start"
       >
-        {pending ? "A gerar..." : "✨ Gerar rascunho com IA"}
+        {pending ? t.generating : t.generateDraftAi}
       </Button>
       {error && <p className="text-xs text-danger">{error}</p>}
       <Button type="submit" variant={submitVariant} size="sm" className="self-start">

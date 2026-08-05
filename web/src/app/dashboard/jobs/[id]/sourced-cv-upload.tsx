@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { uploadSourcedCv } from "./actions";
 import { Button } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 interface FileResult {
   fileName: string;
@@ -14,10 +15,11 @@ interface FileResult {
 
 const MAX_FILES = 15;
 
-export function SourcedCvUpload({ jobId }: { jobId: string }) {
+export function SourcedCvUpload({ jobId, dict }: { jobId: string; dict: Dictionary }) {
   const [open, setOpen] = useState(false);
   const [results, setResults] = useState<FileResult[]>([]);
   const [running, setRunning] = useState(false);
+  const t = dict.sourcedCvUpload;
 
   async function handleFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
@@ -72,14 +74,11 @@ export function SourcedCvUpload({ jobId }: { jobId: string }) {
       onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
     >
       <summary className="cursor-pointer list-none text-sm font-medium text-primary underline">
-        Carregar CVs (sourcing directo)
+        {t.uploadCvs}
       </summary>
       <div className="mt-3 flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-muted p-4">
         <p className="text-xs text-muted-foreground">
-          Carrega CVs de candidatos que já tens (LinkedIn, banco de talentos,
-          referências) sem esperar que se candidatem pelo site. Nome e email
-          são extraídos automaticamente do CV — ficheiros sem email
-          identificável são ignorados. Até {MAX_FILES} PDFs de cada vez.
+          {t.description} {t.maxFilesBefore} {MAX_FILES} {t.maxFilesAfter}
         </p>
         <input
           type="file"
@@ -98,14 +97,14 @@ export function SourcedCvUpload({ jobId }: { jobId: string }) {
                   {r.fileName}
                 </span>{" "}
                 {r.status === "pending" && (
-                  <span className="text-muted-foreground">em fila...</span>
+                  <span className="text-muted-foreground">{t.statusQueued}</span>
                 )}
                 {r.status === "processing" && (
-                  <span className="text-primary">a processar...</span>
+                  <span className="text-primary">{t.statusProcessing}</span>
                 )}
                 {r.status === "success" && (
                   <span className="text-success">
-                    ✓ {r.candidateName} — score {r.score}
+                    ✓ {r.candidateName} — {t.scoreLabel} {r.score}
                   </span>
                 )}
                 {r.status === "skipped" && (
@@ -123,7 +122,7 @@ export function SourcedCvUpload({ jobId }: { jobId: string }) {
 
         {running && (
           <Button type="button" variant="secondary" size="sm" disabled className="self-start">
-            A processar CVs...
+            {t.processingCvs}
           </Button>
         )}
       </div>

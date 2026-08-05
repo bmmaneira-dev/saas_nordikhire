@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { generateReport } from "./actions";
 import { Button } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 interface TrainingRecommendationRow {
   gap: string;
@@ -23,15 +24,18 @@ export function ReportSection({
   jobId,
   devReport,
   hasEvaluationData,
+  dict,
 }: {
   applicationId: string;
   jobId: string;
   devReport: DevReportRow | null | undefined;
   hasEvaluationData: boolean;
+  dict: Dictionary;
 }) {
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [failed, setFailed] = useState(false);
+  const t = dict.reportSection;
 
   function handleGenerate() {
     setFailed(false);
@@ -49,7 +53,7 @@ export function ReportSection({
     <div className="mt-3 border-t border-surface-border pt-3">
       <div className="flex items-center justify-between gap-2">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Relatório de desenvolvimento
+          {t.title}
         </p>
         {hasEvaluationData ? (
           <Button
@@ -59,21 +63,20 @@ export function ReportSection({
             onClick={handleGenerate}
             disabled={pending}
           >
-            {pending ? "A gerar..." : devReport ? "Actualizar" : "Gerar relatório"}
+            {pending ? t.generating : devReport ? t.update : t.generateReport}
           </Button>
         ) : (
-          <span className="text-xs text-muted-foreground">Sem dados suficientes</span>
+          <span className="text-xs text-muted-foreground">{t.notEnoughData}</span>
         )}
       </div>
       {!hasEvaluationData && (
         <p className="mt-1 text-xs text-muted-foreground">
-          Precisa de pelo menos um score de CV, red flags, uma entrevista
-          concluída ou um teste concluído antes de gerar um relatório.
+          {t.notEnoughDataHint}
         </p>
       )}
       {failed && (
         <p className="mt-1 text-xs text-danger">
-          Erro ao gerar o relatório. Tenta novamente.
+          {t.generateError}
         </p>
       )}
       {devReport && (
@@ -83,7 +86,7 @@ export function ReportSection({
           onToggle={(e) => setOpen(e.currentTarget.open)}
         >
           <summary className="cursor-pointer list-none text-xs font-medium text-primary underline">
-            Ver relatório
+            {t.viewReport}
           </summary>
           {devReport.overall_summary && (
             <p className="mt-2 text-sm text-foreground/90">
@@ -92,7 +95,7 @@ export function ReportSection({
           )}
           {(devReport.strengths?.length ?? 0) > 0 && (
             <div className="mt-3">
-              <p className="text-xs font-medium text-success">Pontos fortes</p>
+              <p className="text-xs font-medium text-success">{t.strengths}</p>
               <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
                 {devReport.strengths!.map((s, i) => (
                   <li key={i}>• {s}</li>
@@ -102,7 +105,7 @@ export function ReportSection({
           )}
           {(devReport.technical_gaps?.length ?? 0) > 0 && (
             <div className="mt-3">
-              <p className="text-xs font-medium text-warning">Lacunas técnicas</p>
+              <p className="text-xs font-medium text-warning">{t.technicalGaps}</p>
               <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
                 {devReport.technical_gaps!.map((s, i) => (
                   <li key={i}>• {s}</li>
@@ -113,7 +116,7 @@ export function ReportSection({
           {(devReport.behavioral_gaps?.length ?? 0) > 0 && (
             <div className="mt-3">
               <p className="text-xs font-medium text-warning">
-                Lacunas comportamentais
+                {t.behavioralGaps}
               </p>
               <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
                 {devReport.behavioral_gaps!.map((s, i) => (
@@ -125,7 +128,7 @@ export function ReportSection({
           {(devReport.training_recommendations?.length ?? 0) > 0 && (
             <div className="mt-3">
               <p className="text-xs font-medium text-primary">
-                Recomendações de formação
+                {t.trainingRecommendations}
               </p>
               <ul className="mt-1 flex flex-col gap-0.5 text-sm text-foreground/90">
                 {devReport.training_recommendations!.map((r, i) => (

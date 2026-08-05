@@ -3,13 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { buttonClass } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
 
 export function SharePanel({
   slug,
   jobTitle,
+  dict,
 }: {
   slug: string;
   jobTitle: string;
+  dict: Dictionary;
 }) {
   const [url, setUrl] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState("");
@@ -17,6 +20,7 @@ export function SharePanel({
     "idle"
   );
   const inputRef = useRef<HTMLInputElement>(null);
+  const t = dict.sharePanel;
 
   useEffect(() => {
     const fullUrl = `${window.location.origin}/jobs/${slug}`;
@@ -51,7 +55,7 @@ export function SharePanel({
   }
 
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(
-    `Vê esta vaga: ${jobTitle} — ${url}`
+    `${t.whatsappMessagePrefix} ${jobTitle} — ${url}`
   )}`;
   const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
     url
@@ -60,14 +64,14 @@ export function SharePanel({
   return (
     <details className="mt-4">
       <summary className="cursor-pointer list-none text-sm font-medium text-primary underline">
-        Partilhar vaga
+        {t.shareJob}
       </summary>
       <div className="mt-3 flex flex-col gap-4 rounded-xl border border-surface-border bg-surface-muted p-4 sm:flex-row sm:items-start">
         {qrDataUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={qrDataUrl}
-            alt="QR code da vaga"
+            alt={t.qrAlt}
             className="h-32 w-32 shrink-0 rounded-lg bg-white p-2"
           />
         )}
@@ -86,10 +90,10 @@ export function SharePanel({
               className={buttonClass("secondary", "sm", "shrink-0")}
             >
               {copyState === "copied"
-                ? "Copiado ✓"
+                ? t.copied
                 : copyState === "error"
-                  ? "Selecciona e copia (Ctrl+C)"
-                  : "Copiar link"}
+                  ? t.selectAndCopy
+                  : t.copyLink}
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -115,7 +119,7 @@ export function SharePanel({
                 download={`qr-vaga-${slug}.png`}
                 className={buttonClass("ghost", "sm")}
               >
-                Descarregar QR
+                {t.downloadQr}
               </a>
             )}
           </div>

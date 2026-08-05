@@ -258,6 +258,81 @@ export interface Dictionary {
     saving: string;
     save: string;
   };
+  jobDetail: {
+    back: string;
+    viewPublicPage: string;
+    addTranslation: string;
+    chooseLanguage: string;
+    translateWithAi: string;
+    machineTranslatedSuffix: string;
+    comparisonSummary: string;
+    colCandidate: string;
+    colScore: string;
+    colStatus: string;
+    colInterview: string;
+    colBestTest: string;
+    colRedFlags: string;
+    noApplicationsYet: string;
+    noScore: string;
+    skillsLabel: string;
+    experienceLabel: string;
+    educationLabel: string;
+    languagesLabel: string;
+    presentationVideo: string;
+    redFlagsHeading: string;
+    testsHeading: string;
+    viewAnswersEvaluation: string;
+    viewInterviewEvaluation: string;
+    continueAiInterview: string;
+    startAiInterview: string;
+    advanceTo: string;
+    reject: string;
+    rejectionPlaceholder: string;
+    confirmRejection: string;
+    sendFeedback: string;
+    feedbackPlaceholder: string;
+    send: string;
+    assignTest: string;
+    generateAndAssign: string;
+    feedbackSentHeading: string;
+  };
+  feedbackComposer: {
+    generating: string;
+    generateDraftAi: string;
+  };
+  reportSection: {
+    title: string;
+    generating: string;
+    update: string;
+    generateReport: string;
+    notEnoughData: string;
+    notEnoughDataHint: string;
+    generateError: string;
+    viewReport: string;
+    strengths: string;
+    technicalGaps: string;
+    behavioralGaps: string;
+    trainingRecommendations: string;
+  };
+  sharePanel: {
+    shareJob: string;
+    qrAlt: string;
+    copyLink: string;
+    copied: string;
+    selectAndCopy: string;
+    downloadQr: string;
+    whatsappMessagePrefix: string;
+  };
+  sourcedCvUpload: {
+    uploadCvs: string;
+    description: string;
+    maxFilesBefore: string;
+    maxFilesAfter: string;
+    statusQueued: string;
+    statusProcessing: string;
+    scoreLabel: string;
+    processingCvs: string;
+  };
 }
 
 const pt: Dictionary = {
@@ -524,6 +599,83 @@ const pt: Dictionary = {
     updated: "Perfil actualizado.",
     saving: "A guardar...",
     save: "Guardar",
+  },
+  jobDetail: {
+    back: "← Voltar às vagas",
+    viewPublicPage: "Ver página pública →",
+    addTranslation: "+ Adicionar tradução",
+    chooseLanguage: "Escolhe um idioma",
+    translateWithAi: "Traduzir com IA",
+    machineTranslatedSuffix: " · IA",
+    comparisonSummary: "Resumo comparativo",
+    colCandidate: "Candidato",
+    colScore: "Score",
+    colStatus: "Estado",
+    colInterview: "Entrevista",
+    colBestTest: "Melhor teste",
+    colRedFlags: "Red flags",
+    noApplicationsYet: "Ainda não há candidaturas.",
+    noScore: "sem score",
+    skillsLabel: "Skills",
+    experienceLabel: "Experiência",
+    educationLabel: "Formação",
+    languagesLabel: "Idiomas",
+    presentationVideo: "Vídeo de apresentação",
+    redFlagsHeading: "Red flags",
+    testsHeading: "Testes",
+    viewAnswersEvaluation: "Ver respostas e avaliação",
+    viewInterviewEvaluation: "Ver entrevista e avaliação →",
+    continueAiInterview: "Continuar entrevista IA →",
+    startAiInterview: "Iniciar entrevista com IA",
+    advanceTo: "Avançar para:",
+    reject: "Rejeitar",
+    rejectionPlaceholder: "Motivo / feedback para o candidato (opcional)",
+    confirmRejection: "Confirmar rejeição",
+    sendFeedback: "Enviar feedback",
+    feedbackPlaceholder: "Mensagem para o candidato",
+    send: "Enviar",
+    assignTest: "Atribuir teste",
+    generateAndAssign: "Gerar e atribuir",
+    feedbackSentHeading: "Feedback enviado",
+  },
+  feedbackComposer: {
+    generating: "A gerar...",
+    generateDraftAi: "✨ Gerar rascunho com IA",
+  },
+  reportSection: {
+    title: "Relatório de desenvolvimento",
+    generating: "A gerar...",
+    update: "Actualizar",
+    generateReport: "Gerar relatório",
+    notEnoughData: "Sem dados suficientes",
+    notEnoughDataHint:
+      "Precisa de pelo menos um score de CV, red flags, uma entrevista concluída ou um teste concluído antes de gerar um relatório.",
+    generateError: "Erro ao gerar o relatório. Tenta novamente.",
+    viewReport: "Ver relatório",
+    strengths: "Pontos fortes",
+    technicalGaps: "Lacunas técnicas",
+    behavioralGaps: "Lacunas comportamentais",
+    trainingRecommendations: "Recomendações de formação",
+  },
+  sharePanel: {
+    shareJob: "Partilhar vaga",
+    qrAlt: "QR code da vaga",
+    copyLink: "Copiar link",
+    copied: "Copiado ✓",
+    selectAndCopy: "Seleciona e copia (Ctrl+C)",
+    downloadQr: "Descarregar QR",
+    whatsappMessagePrefix: "Vê esta vaga:",
+  },
+  sourcedCvUpload: {
+    uploadCvs: "Carregar CVs (sourcing directo)",
+    description:
+      "Carrega CVs de candidatos que já tens (LinkedIn, banco de talentos, referências) sem esperar que se candidatem pelo site. Nome e email são extraídos automaticamente do CV — ficheiros sem email identificável são ignorados.",
+    maxFilesBefore: "Até",
+    maxFilesAfter: "PDFs de cada vez.",
+    statusQueued: "em fila...",
+    statusProcessing: "a processar...",
+    scoreLabel: "score",
+    processingCvs: "A processar CVs...",
   },
 };
 

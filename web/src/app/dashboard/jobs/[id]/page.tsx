@@ -3,6 +3,10 @@ import { notFound, redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { toOne } from "@/lib/to-one";
+import { toLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/get-dictionary";
+import type { Dictionary } from "@/lib/i18n/get-dictionary";
+import { statusLabel } from "@/lib/i18n/status-label";
 import { startInterview } from "@/app/interview/actions";
 import {
   advanceApplication,
@@ -37,22 +41,15 @@ const STAGE_ORDER = [
   "offer",
   "hired",
 ];
-const STAGE_LABELS: Record<string, string> = {
-  shortlisted: "Pré-selecionado",
-  interview: "Entrevista",
-  test: "Teste",
-  offer: "Oferta",
-  hired: "Contratado",
-};
 const TERMINAL_STATUSES = ["hired", "rejected", "withdrawn"];
 const VIDEO_BUCKET = "application-videos";
 
-function nextStageLabel(current: string): string | null {
+function nextStageLabel(current: string, dict: Dictionary): string | null {
   const idx = STAGE_ORDER.indexOf(current);
   if (idx === -1 || idx >= STAGE_ORDER.length - 1) return null;
   const shortlistedIdx = STAGE_ORDER.indexOf("shortlisted");
   const next = idx < shortlistedIdx ? "shortlisted" : STAGE_ORDER[idx + 1];
-  return STAGE_LABELS[next] ?? next;
+  return statusLabel(dict, next);
 }
 
 interface FeedbackRow {
@@ -146,6 +143,10 @@ export default async function JobDetailPage({
   const appUser = await getCurrentAppUser();
   if (!appUser) redirect("/login");
 
+  const company = toOne(appUser.companies);
+  const dict = await getDictionary(toLocale(company?.default_locale));
+  const t = dict.jobDetail;
+
   const admin = createAdminClient();
 
   const { data: job } = await admin
@@ -161,7 +162,7 @@ export default async function JobDetailPage({
 
   const translation =
     job.job_translations.find(
-      (t: { locale: string }) => t.locale === "pt"
+      (tr: { locale: string }) => tr.locale === "pt"
     ) ?? job.job_translations[0];
 
   const { data: applications } = await admin
@@ -208,9 +209,9 @@ export default async function JobDetailPage({
       : application.test_assignments
         ? [application.test_assignments as TestAssignmentRow]
         : [];
-    const bestTestScore = testRows.reduce<number | null>((best, t) => {
-      if (t.result_score == null) return best;
-      return best == null ? t.result_score : Math.max(best, t.result_score);
+    const bestTestScore = testRows.reduce<number | null>((best, test) => {
+      if (test.result_score == null) return best;
+      return best == null ? test.result_score : Math.max(best, test.result_score);
     }, null);
 
     return {
@@ -231,7 +232,7 @@ export default async function JobDetailPage({
           href="/dashboard/jobs"
           className="text-sm text-muted-foreground underline"
         >
-          ← Voltar às vagas
+          {t.back}
         </Link>
         <div className="mt-4 flex items-center justify-between">
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -243,36 +244,36 @@ export default async function JobDetailPage({
               target="_blank"
               className="text-sm font-medium text-primary underline"
             >
-              Ver página pública →
+              {t.viewPublicPage}
             </Link>
           )}
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          {applications?.length ?? 0} candidatura(s)
+          {applications?.length ?? 0} {dict.jobsList.applicationsCount}
         </p>
 
         {job.public_slug && (
-          <SharePanel slug={job.public_slug} jobTitle={translation?.title ?? ""} />
+          <SharePanel slug={job.public_slug} jobTitle={translation?.title ?? ""} dict={dict} />
         )}
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {job.job_translations.map(
-            (t: { locale: string; is_machine_translated: boolean | null }) => (
-              <Badge key={t.locale} variant={t.locale === "pt" ? "info" : "neutral"}>
-                {LOCALE_LABELS[t.locale as keyof typeof LOCALE_LABELS] ?? t.locale}
-                {t.is_machine_translated ? " · IA" : ""}
+            (tr: { locale: string; is_machine_translated: boolean | null }) => (
+              <Badge key={tr.locale} variant={tr.locale === "pt" ? "info" : "neutral"}>
+                {LOCALE_LABELS[tr.locale as keyof typeof LOCALE_LABELS] ?? tr.locale}
+                {tr.is_machine_translated ? t.machineTranslatedSuffix : ""}
               </Badge>
             )
           )}
           {SUPPORTED_LOCALES.some(
             (locale) =>
               !job.job_translations.some(
-                (t: { locale: string }) => t.locale === locale
+                (tr: { locale: string }) => tr.locale === locale
               )
           ) && (
             <details>
               <summary className="cursor-pointer list-none text-sm font-medium text-primary underline">
-                + Adicionar tradução
+                {t.addTranslation}
               </summary>
               <form
                 action={translateJob.bind(null, job.id)}
@@ -280,12 +281,12 @@ export default async function JobDetailPage({
               >
                 <Select name="locale" defaultValue="">
                   <option value="" disabled>
-                    Escolhe um idioma
+                    {t.chooseLanguage}
                   </option>
                   {SUPPORTED_LOCALES.filter(
                     (locale) =>
                       !job.job_translations.some(
-                        (t: { locale: string }) => t.locale === locale
+                        (tr: { locale: string }) => tr.locale === locale
                       )
                   ).map((locale) => (
                     <option key={locale} value={locale}>
@@ -294,29 +295,29 @@ export default async function JobDetailPage({
                   ))}
                 </Select>
                 <Button type="submit" variant="secondary" size="sm">
-                  Traduzir com IA
+                  {t.translateWithAi}
                 </Button>
               </form>
             </details>
           )}
         </div>
 
-        <SourcedCvUpload jobId={job.id} />
+        <SourcedCvUpload jobId={job.id} dict={dict} />
 
         {summaryRows.length > 0 && (
           <Card className="mt-6 overflow-x-auto px-5 py-4">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Resumo comparativo
+              {t.comparisonSummary}
             </p>
             <table className="mt-2 w-full min-w-[560px] text-left text-sm">
               <thead>
                 <tr className="text-xs text-muted-foreground">
-                  <th className="py-1.5 pr-3 font-medium">Candidato</th>
-                  <th className="py-1.5 pr-3 font-medium">Score</th>
-                  <th className="py-1.5 pr-3 font-medium">Estado</th>
-                  <th className="py-1.5 pr-3 font-medium">Entrevista</th>
-                  <th className="py-1.5 pr-3 font-medium">Melhor teste</th>
-                  <th className="py-1.5 font-medium">Red flags</th>
+                  <th className="py-1.5 pr-3 font-medium">{t.colCandidate}</th>
+                  <th className="py-1.5 pr-3 font-medium">{t.colScore}</th>
+                  <th className="py-1.5 pr-3 font-medium">{t.colStatus}</th>
+                  <th className="py-1.5 pr-3 font-medium">{t.colInterview}</th>
+                  <th className="py-1.5 pr-3 font-medium">{t.colBestTest}</th>
+                  <th className="py-1.5 font-medium">{t.colRedFlags}</th>
                 </tr>
               </thead>
               <tbody>
@@ -334,10 +335,12 @@ export default async function JobDetailPage({
                       {row.score != null ? Math.round(row.score) : "-"}
                     </td>
                     <td className="py-1.5 pr-3">
-                      <Badge variant={statusVariant(row.status)}>{row.status}</Badge>
+                      <Badge variant={statusVariant(row.status)}>
+                        {statusLabel(dict, row.status)}
+                      </Badge>
                     </td>
                     <td className="py-1.5 pr-3 text-muted-foreground">
-                      {row.interviewStatus ?? "-"}
+                      {row.interviewStatus ? statusLabel(dict, row.interviewStatus) : "-"}
                     </td>
                     <td className="py-1.5 pr-3 text-muted-foreground">
                       {row.bestTestScore != null ? Math.round(row.bestTestScore) : "-"}
@@ -361,7 +364,7 @@ export default async function JobDetailPage({
         <ul className="mt-6 flex flex-col gap-4">
           {applications?.length === 0 && (
             <Card className="border-dashed px-4 py-10 text-center text-sm text-muted-foreground shadow-none">
-              Ainda não há candidaturas.
+              {t.noApplicationsYet}
             </Card>
           )}
           {applications?.map((application) => {
@@ -400,7 +403,7 @@ export default async function JobDetailPage({
             );
 
             const isTerminal = TERMINAL_STATUSES.includes(application.status);
-            const nextLabel = nextStageLabel(application.status);
+            const nextLabel = nextStageLabel(application.status, dict);
 
             const redFlags: RedFlagRow[] = Array.isArray(application.red_flags)
               ? application.red_flags
@@ -450,12 +453,12 @@ export default async function JobDetailPage({
                       </span>
                     ) : (
                       <span className="text-sm text-muted-foreground">
-                        sem score
+                        {t.noScore}
                       </span>
                     )}
                     <div className="mt-1">
                       <Badge variant={statusVariant(application.status)}>
-                        {application.status}
+                        {statusLabel(dict, application.status)}
                       </Badge>
                     </div>
                   </div>
@@ -464,15 +467,15 @@ export default async function JobDetailPage({
                 {scoring && (
                   <div className="mt-3 border-t border-surface-border pt-3 text-sm">
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      <span>Skills: {scoring.breakdown?.skills_match ?? "-"}</span>
+                      <span>{t.skillsLabel}: {scoring.breakdown?.skills_match ?? "-"}</span>
                       <span>
-                        Experiência: {scoring.breakdown?.experience_match ?? "-"}
+                        {t.experienceLabel}: {scoring.breakdown?.experience_match ?? "-"}
                       </span>
                       <span>
-                        Formação: {scoring.breakdown?.education_match ?? "-"}
+                        {t.educationLabel}: {scoring.breakdown?.education_match ?? "-"}
                       </span>
                       <span>
-                        Idiomas: {scoring.breakdown?.language_match ?? "-"}
+                        {t.languagesLabel}: {scoring.breakdown?.language_match ?? "-"}
                       </span>
                     </div>
                     {scoring.ai_reasoning && (
@@ -486,7 +489,7 @@ export default async function JobDetailPage({
                 {application.video_url && videoUrlMap.get(application.video_url) && (
                   <div className="mt-3 border-t border-surface-border pt-3">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Vídeo de apresentação
+                      {t.presentationVideo}
                     </p>
                     <video
                       controls
@@ -499,7 +502,7 @@ export default async function JobDetailPage({
                 {redFlags.length > 0 && (
                   <div className="mt-3 border-t border-surface-border pt-3">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Red flags
+                      {t.redFlagsHeading}
                     </p>
                     <ul className="mt-2 flex flex-col gap-2">
                       {redFlags.map((flag, i) => (
@@ -519,7 +522,7 @@ export default async function JobDetailPage({
                 {sortedTests.length > 0 && (
                   <div className="mt-3 border-t border-surface-border pt-3">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Testes
+                      {t.testsHeading}
                     </p>
                     <ul className="mt-2 flex flex-col gap-2">
                       {sortedTests.map((test) => {
@@ -539,7 +542,7 @@ export default async function JobDetailPage({
                                   </span>
                                 )}
                                 <Badge variant={statusVariant(test.status)}>
-                                  {test.status}
+                                  {statusLabel(dict, test.status)}
                                 </Badge>
                               </div>
                             </div>
@@ -563,7 +566,7 @@ export default async function JobDetailPage({
                             {test.status === "completed" && (
                               <details className="mt-1">
                                 <summary className="cursor-pointer list-none text-xs font-medium text-primary underline">
-                                  Ver respostas e avaliação
+                                  {t.viewAnswersEvaluation}
                                 </summary>
                                 {test.result_raw?.overall_summary && (
                                   <p className="mt-2 text-foreground/90">
@@ -604,13 +607,13 @@ export default async function JobDetailPage({
                       className="text-sm font-medium text-primary underline"
                     >
                       {interview.status === "completed"
-                        ? "Ver entrevista e avaliação →"
-                        : "Continuar entrevista IA →"}
+                        ? t.viewInterviewEvaluation
+                        : t.continueAiInterview}
                     </Link>
                   ) : (
                     <form action={startInterview.bind(null, application.id)}>
                       <Button type="submit" variant="secondary" size="sm">
-                        Iniciar entrevista com IA
+                        {t.startAiInterview}
                       </Button>
                     </form>
                   )}
@@ -621,6 +624,7 @@ export default async function JobDetailPage({
                   jobId={job.id}
                   devReport={devReport}
                   hasEvaluationData={hasEvaluationData}
+                  dict={dict}
                 />
 
                 {!isTerminal && (
@@ -629,27 +633,28 @@ export default async function JobDetailPage({
                       {nextLabel && (
                         <form action={advanceApplication.bind(null, application.id, job.id)}>
                           <Button type="submit" size="sm">
-                            Avançar para: {nextLabel}
+                            {t.advanceTo} {nextLabel}
                           </Button>
                         </form>
                       )}
                       <details className="w-full sm:w-auto">
                         <summary className="cursor-pointer list-none text-sm font-medium text-danger underline">
-                          Rejeitar
+                          {t.reject}
                         </summary>
                         <FeedbackComposer
                           applicationId={application.id}
                           jobId={job.id}
                           draftType="rejection"
                           formAction={rejectApplication.bind(null, application.id, job.id)}
-                          placeholder="Motivo / feedback para o candidato (opcional)"
-                          submitLabel="Confirmar rejeição"
+                          placeholder={t.rejectionPlaceholder}
+                          submitLabel={t.confirmRejection}
                           submitVariant="danger"
+                          dict={dict}
                         />
                       </details>
                       <details className="w-full sm:w-auto">
                         <summary className="cursor-pointer list-none text-sm font-medium text-primary underline">
-                          Enviar feedback
+                          {t.sendFeedback}
                         </summary>
                         <FeedbackComposer
                           applicationId={application.id}
@@ -657,14 +662,15 @@ export default async function JobDetailPage({
                           draftType="general"
                           formAction={sendFeedback.bind(null, application.id, job.id)}
                           required
-                          placeholder="Mensagem para o candidato"
-                          submitLabel="Enviar"
+                          placeholder={t.feedbackPlaceholder}
+                          submitLabel={t.send}
                           submitVariant="secondary"
+                          dict={dict}
                         />
                       </details>
                       <details className="w-full sm:w-auto">
                         <summary className="cursor-pointer list-none text-sm font-medium text-primary underline">
-                          Atribuir teste
+                          {t.assignTest}
                         </summary>
                         <form
                           action={assignTest.bind(null, application.id, job.id)}
@@ -680,7 +686,7 @@ export default async function JobDetailPage({
                             )}
                           </Select>
                           <Button type="submit" variant="secondary" size="sm" className="self-start">
-                            Gerar e atribuir
+                            {t.generateAndAssign}
                           </Button>
                         </form>
                       </details>
@@ -691,7 +697,7 @@ export default async function JobDetailPage({
                 {feedbackHistory.length > 0 && (
                   <div className="mt-3 border-t border-surface-border pt-3">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Feedback enviado
+                      {t.feedbackSentHeading}
                     </p>
                     <ul className="mt-1 flex flex-col gap-1.5">
                       {feedbackHistory.map((fb, i) => (
