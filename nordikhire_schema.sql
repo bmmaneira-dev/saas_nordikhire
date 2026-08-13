@@ -637,17 +637,59 @@ create unique index idx_blocked_identity on blocked_identities(identity_type, id
 
 -- Rate limiting de formulários públicos e acções que chamam a Anthropic API
 -- (login, candidatura, entrevista simulada, testes, etc.) — cada tentativa
--- fica registada aqui; a contagem de tentativas numa janela de tempo corre
--- na aplicação (lib/rate-limit.ts), esta tabela só guarda os eventos brutos.
--- Sem company_id/candidate_id: "key" é o identificador do bucket (IP, email,
--- company_id ou candidate_id conforme o caso), não uma referência a tenant.
+-- fica registada aqui. Sem company_id/candidate_id: "key" é o identificador
+-- do bucket (IP, email, company_id ou candidate_id conforme o caso), não
+-- uma referência a tenant.
 create table rate_limit_hits (
     id                  uuid primary key default gen_random_uuid(),
     bucket                text not null,                  -- ex: 'login_ip', 'interview_message'
     key                    text not null,                  -- identificador dentro do bucket (IP, email, id, etc.)
-    created_at              timestamptz default now()
+    created_at              timestamptz not null default now()
 );
 create index rate_limit_hits_lookup_idx on rate_limit_hits(bucket, key, created_at);
+
+-- A contagem-e-registo corre inteira dentro desta função (não em duas
+-- chamadas separadas de lib/rate-limit.ts) — SELECT-then-INSERT a partir da
+-- aplicação era uma corrida (TOCTOU): N pedidos concorrentes liam a mesma
+-- contagem antes de qualquer um incrementar, e todos passavam o limite.
+-- O advisory lock, mantido até ao fim desta chamada, serializa pedidos
+-- concorrentes para o mesmo (bucket, key). Corrigido num audit de segurança
+-- pré-lançamento (2026-08-13); só o service_role invoca isto (RPC).
+create or replace function check_and_record_rate_limit(
+    p_bucket text,
+    p_key text,
+    p_max_attempts integer,
+    p_window_minutes integer
+) returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+    v_since timestamptz := now() - (p_window_minutes || ' minutes')::interval;
+    v_count integer;
+begin
+    perform pg_advisory_xact_lock(hashtextextended(p_bucket || ':' || p_key, 0));
+
+    select count(*) into v_count
+    from rate_limit_hits
+    where bucket = p_bucket and key = p_key and created_at >= v_since;
+
+    if v_count >= p_max_attempts then
+        return false;
+    end if;
+
+    insert into rate_limit_hits (bucket, key) values (p_bucket, p_key);
+
+    delete from rate_limit_hits
+    where bucket = p_bucket and created_at < now() - interval '1 day';
+
+    return true;
+end;
+$$;
+revoke execute on function check_and_record_rate_limit(text, text, integer, integer) from public;
+revoke execute on function check_and_record_rate_limit(text, text, integer, integer) from anon;
+revoke execute on function check_and_record_rate_limit(text, text, integer, integer) from authenticated;
 
 -- ============================================================================
 -- 16. ONBOARDING — progresso guiado para empresas e candidatos
