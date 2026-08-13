@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Logo } from "@/components/ui/logo";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Reveal } from "@/components/marketing/reveal";
 import { PipelinePreview } from "@/components/marketing/pipeline-preview";
+import { SiteHeader } from "@/components/marketing/site-header";
+import { SiteFooter } from "@/components/marketing/site-footer";
 import type { PlanInfo } from "@/lib/billing";
 
 function formatPlanPrice(plan: PlanInfo): string {
@@ -87,34 +87,7 @@ const STEPS = [
 export function LandingPage({ plans }: { plans: PlanInfo[] }) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-40 border-b border-surface-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Logo />
-          <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
-            <a href="#empresas" className="hover:text-foreground">
-              Para empresas
-            </a>
-            <a href="#candidatos" className="hover:text-foreground">
-              Para candidatos
-            </a>
-            <a href="#precos" className="hover:text-foreground">
-              Preços
-            </a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Link
-              href="/login"
-              className="hidden text-sm font-medium text-muted-foreground hover:text-foreground sm:inline"
-            >
-              Entrar
-            </Link>
-            <ButtonLink href="/signup" size="sm">
-              Sou uma empresa
-            </ButtonLink>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="flex-1">
         <section
@@ -450,61 +423,7 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
         </section>
       </main>
 
-      <footer className="border-t border-surface-border px-6 py-12">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:justify-between">
-          <div>
-            <Logo />
-            <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-              Plataforma de recrutamento com inteligência artificial.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-8 text-sm sm:grid-cols-3">
-            <div className="flex flex-col gap-2">
-              <p className="font-medium text-foreground">Produto</p>
-              <a href="#empresas" className="text-muted-foreground hover:text-foreground">
-                Para empresas
-              </a>
-              <a href="#candidatos" className="text-muted-foreground hover:text-foreground">
-                Para candidatos
-              </a>
-              <a href="#precos" className="text-muted-foreground hover:text-foreground">
-                Preços
-              </a>
-            </div>
-            <div className="flex flex-col gap-2">
-              <p className="font-medium text-foreground">Conta</p>
-              <Link href="/login" className="text-muted-foreground hover:text-foreground">
-                Entrar
-              </Link>
-              <Link href="/signup" className="text-muted-foreground hover:text-foreground">
-                Criar conta da empresa
-              </Link>
-              <Link
-                href="/candidate/signup"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Criar conta de candidato
-              </Link>
-            </div>
-            <div className="flex flex-col gap-2">
-              <p className="font-medium text-foreground">Legal</p>
-              <Link href="/legal/terms" className="text-muted-foreground hover:text-foreground">
-                Termos de serviço
-              </Link>
-              <Link
-                href="/legal/privacy"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Privacidade
-              </Link>
-            </div>
-          </div>
-        </div>
-        <p className="mx-auto mt-10 max-w-7xl text-xs text-muted-foreground">
-          © {new Date().getFullYear()} NordikHire. Todos os direitos
-          reservados.
-        </p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
