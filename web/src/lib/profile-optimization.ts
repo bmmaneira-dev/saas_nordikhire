@@ -55,11 +55,14 @@ const SOURCE_LABELS: Record<string, string> = {
   other_platform: "perfil noutra plataforma de emprego",
 };
 
+const MAX_INPUT_CHARS = 12000;
+
 export async function optimizeProfile(
   sourceType: string,
   inputText: string
 ): Promise<ProfileOptimizationResult> {
   const client = getAnthropicClient();
+  const truncatedText = inputText.slice(0, MAX_INPUT_CHARS);
 
   const response = await client.messages.create({
     model: MODEL,
@@ -78,7 +81,7 @@ export async function optimizeProfile(
 
 TEXTO DO CANDIDATO:
 <candidate_text>
-${inputText}
+${truncatedText}
 </candidate_text>`,
       },
     ],

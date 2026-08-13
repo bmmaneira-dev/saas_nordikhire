@@ -68,6 +68,9 @@ export async function startPractice(_prevState: unknown, formData: FormData) {
   redirect(`/candidate/practice/${practice.id}`);
 }
 
+const MAX_MESSAGE_CHARS = 4000;
+const MAX_TRANSCRIPT_TURNS = 60;
+
 export async function sendPracticeMessage(
   practiceId: string,
   _prevState: unknown,
@@ -76,7 +79,9 @@ export async function sendPracticeMessage(
   const candidate = await getCurrentCandidate();
   if (!candidate) redirect("/candidate/login");
 
-  const message = String(formData.get("message") ?? "").trim();
+  const message = String(formData.get("message") ?? "")
+    .trim()
+    .slice(0, MAX_MESSAGE_CHARS);
   if (!message) return { error: "Escreve uma resposta." };
 
   const admin = createAdminClient();
@@ -93,6 +98,13 @@ export async function sendPracticeMessage(
     return { error: "Esta sessão já terminou." };
   }
 
+  const existingTranscript = (practice.transcript as TranscriptTurn[]) ?? [];
+  if (existingTranscript.length >= MAX_TRANSCRIPT_TURNS) {
+    return {
+      error: "Esta sessão atingiu o limite de mensagens. Termina-a para veres a avaliação.",
+    };
+  }
+
   const { allowed } = await checkRateLimit("practice_message", candidate.id, {
     maxAttempts: 40,
     windowMinutes: 60,
@@ -107,7 +119,7 @@ export async function sendPracticeMessage(
   );
 
   const transcript = [
-    ...((practice.transcript as TranscriptTurn[]) ?? []),
+    ...existingTranscript,
     { role: "candidate", text: message } as TranscriptTurn,
   ];
 

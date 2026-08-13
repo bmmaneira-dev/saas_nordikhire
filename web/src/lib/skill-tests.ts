@@ -169,8 +169,14 @@ export async function evaluateTestAnswers(
 ): Promise<TestEvaluation> {
   const client = getAnthropicClient();
 
+  const MAX_ANSWER_CHARS = 2000;
   const qa = questions
-    .map((q, i) => `Pergunta ${i + 1}: ${q}\nResposta: ${answers[i] ?? "(sem resposta)"}`)
+    .map(
+      (q, i) =>
+        `Pergunta ${i + 1}: ${q}\nResposta: ${
+          answers[i]?.slice(0, MAX_ANSWER_CHARS) ?? "(sem resposta)"
+        }`
+    )
     .join("\n\n");
   const qaBlock = `<candidate_answers>\n${qa}\n</candidate_answers>`;
 

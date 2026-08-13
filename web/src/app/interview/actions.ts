@@ -139,12 +139,17 @@ export async function startInterview(applicationId: string) {
   redirect(`/interview/${interview.id}`);
 }
 
+const MAX_MESSAGE_CHARS = 4000;
+const MAX_TRANSCRIPT_TURNS = 60; // ~30 trocas — chega para qualquer entrevista real
+
 export async function sendInterviewMessage(
   interviewId: string,
   _prevState: unknown,
   formData: FormData
 ) {
-  const message = String(formData.get("message") ?? "").trim();
+  const message = String(formData.get("message") ?? "")
+    .trim()
+    .slice(0, MAX_MESSAGE_CHARS);
   if (!message) return { error: "Escreve uma resposta." };
 
   const admin = createAdminClient();
@@ -166,6 +171,13 @@ export async function sendInterviewMessage(
     return { error: "Esta entrevista já terminou." };
   }
 
+  const existingTranscript = (interview.transcript as TranscriptTurn[]) ?? [];
+  if (existingTranscript.length >= MAX_TRANSCRIPT_TURNS) {
+    return {
+      error: "Esta entrevista atingiu o limite de mensagens. Termina-a para veres a avaliação.",
+    };
+  }
+
   const candidate = await getCurrentCandidate();
   const { allowed } = await checkRateLimit(
     "interview_message",
@@ -181,7 +193,7 @@ export async function sendInterviewMessage(
   );
 
   const transcript = [
-    ...((interview.transcript as TranscriptTurn[]) ?? []),
+    ...existingTranscript,
     { role: "candidate", text: message } as TranscriptTurn,
   ];
 
