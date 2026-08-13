@@ -176,24 +176,42 @@ export interface Dictionary {
     billingTitle: string;
     billingDescription: string;
   };
-  comingSoon: {
-    label: string;
-  };
   talentPool: {
     title: string;
     subtitle: string;
-    bodyBefore: string;
-    linkLabel: string;
-    bodyAfter: string;
+    searchPlaceholder: string;
+    search: string;
+    allLevels: string;
+    empty: string;
+    noResults: string;
+    applicationsSuffix: string;
+    viewProfile: string;
+    recommendedHeading: string;
+    recommendedSubtitle: string;
+    recommendedFor: string;
+    matchedSkillsSuffix: string;
   };
-  reportsPlaceholder: {
+  reports: {
     title: string;
     subtitle: string;
-    bodyBefore: string;
-    dashboardLabel: string;
-    bodyMiddle: string;
-    pipelineLabel: string;
-    bodyAfter: string;
+    kpiAvgTimeToHire: string;
+    kpiHireRate: string;
+    kpiTotalApplications: string;
+    kpiTotalHired: string;
+    funnelHeading: string;
+    sourceHeading: string;
+    jobPerformanceHeading: string;
+    jobPerformanceJob: string;
+    jobPerformanceApplications: string;
+    jobPerformanceHired: string;
+    jobPerformanceAvgScore: string;
+    exportCsv: string;
+    empty: string;
+    sourceSite: string;
+    sourceLink: string;
+    sourceQrcode: string;
+    sourceWhatsapp: string;
+    sourceTelegram: string;
   };
   team: {
     backToCompany: string;
@@ -659,26 +677,43 @@ const pt: Dictionary = {
     billingTitle: "Plano de subscrição",
     billingDescription: "Plano actual, uso e opções de facturação.",
   },
-  comingSoon: {
-    label: "Em breve",
-  },
   talentPool: {
     title: "Banco de Talentos",
     subtitle: "Candidatos que podem ser reutilizados em futuras vagas.",
-    bodyBefore:
-      "Pesquisa por competências, talent pools organizados por área, e recomendações automáticas de candidatos anteriores adequados a novas vagas. Entretanto, usa a secção",
-    linkLabel: "Candidatos",
-    bodyAfter: "para pesquisar todos os candidatos que já se candidataram.",
+    searchPlaceholder: "Pesquisar por nome, email ou competência...",
+    search: "Pesquisar",
+    allLevels: "Todas as senioridades",
+    empty: "Ainda não há candidatos disponíveis no banco de talentos.",
+    noResults: "Nenhum candidato encontrado com estes filtros.",
+    applicationsSuffix: "candidatura(s) anteriores",
+    viewProfile: "Ver perfil",
+    recommendedHeading: "Recomendados para vagas abertas",
+    recommendedSubtitle:
+      "Candidatos do banco de talentos cujas competências correspondem a vagas activas.",
+    recommendedFor: "Correspondências para",
+    matchedSkillsSuffix: "competência(s) em comum",
   },
-  reportsPlaceholder: {
+  reports: {
     title: "Relatórios",
     subtitle: "Métricas e desempenho do recrutamento.",
-    bodyBefore:
-      "Tempo médio de contratação, conversão por etapa do pipeline, origem dos candidatos, performance por vaga, e exportações. Entretanto, o",
-    dashboardLabel: "Dashboard",
-    bodyMiddle: "já mostra os KPIs principais e a",
-    pipelineLabel: "Pipeline",
-    bodyAfter: "dá uma vista visual do funil por etapa.",
+    kpiAvgTimeToHire: "Tempo médio de contratação (dias)",
+    kpiHireRate: "Taxa de contratação",
+    kpiTotalApplications: "Candidaturas totais",
+    kpiTotalHired: "Contratados",
+    funnelHeading: "Conversão por etapa do pipeline",
+    sourceHeading: "Origem dos candidatos",
+    jobPerformanceHeading: "Performance por vaga",
+    jobPerformanceJob: "Vaga",
+    jobPerformanceApplications: "Candidaturas",
+    jobPerformanceHired: "Contratados",
+    jobPerformanceAvgScore: "Score médio",
+    exportCsv: "Exportar CSV",
+    empty: "Ainda não há candidaturas para gerar relatórios.",
+    sourceSite: "Site",
+    sourceLink: "Link partilhado",
+    sourceQrcode: "QR Code",
+    sourceWhatsapp: "WhatsApp",
+    sourceTelegram: "Telegram",
   },
   team: {
     backToCompany: "← Voltar à empresa",
