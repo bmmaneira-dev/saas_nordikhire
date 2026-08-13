@@ -8,7 +8,7 @@ export async function requestPasswordReset(
   formData: FormData
 ) {
   const email = String(formData.get("email") ?? "").trim();
-  const origin = String(formData.get("origin") ?? "").trim();
+  const origin = process.env.SITE_URL ?? "http://localhost:3000";
 
   if (!email) {
     return { error: "Indica o teu email." };

@@ -72,8 +72,14 @@ export async function candidateSignup(_prevState: unknown, formData: FormData) {
   }
 
   // Pode já existir um registo de candidato global (ex: candidatou-se como
-  // convidado a uma vaga antes de criar conta) — ligamos a conta a esse
-  // registo em vez de criar um duplicado.
+  // convidado a uma vaga antes de criar conta). NUNCA ligamos automaticamente
+  // essa conta ao registo existente só por o email coincidir — o email não
+  // foi verificado (ver nota acima), e essa candidatura antiga pode conter
+  // CVs, transcrições de entrevista e feedback de outras empresas. Ligar
+  // automaticamente daria a quem souber o email de outra pessoa acesso
+  // instantâneo a todo esse histórico. Em vez disso, recusamos a criação de
+  // conta nova quando já existe actividade não reclamada com este email, e
+  // encaminhamos para suporte para uma reclamação manual e verificada.
   const { data: existing } = await admin
     .from("candidates")
     .select("id, auth_user_id")
@@ -82,20 +88,14 @@ export async function candidateSignup(_prevState: unknown, formData: FormData) {
 
   if (existing) {
     if (!existing.auth_user_id) {
-      const { error: linkError } = await admin
-        .from("candidates")
-        .update({
-          auth_user_id: userId,
-          full_name: fullName,
-          preferred_locale: locale,
-          consent_data_processing: true,
-          consent_date: new Date().toISOString(),
-        })
-        .eq("id", existing.id);
-      if (linkError) {
-        return { error: "Erro ao ligar candidato: " + linkError.message };
-      }
+      await admin.auth.admin.deleteUser(userId);
+      return {
+        error:
+          "Já existe actividade associada a este email (ex: uma candidatura anterior). Por segurança, não ligamos isso automaticamente a uma conta nova — contacta o suporte para recuperar o teu histórico.",
+      };
     }
+    // existing.auth_user_id já aponta para outra conta — email já registado;
+    // supabase.auth.signUp() já teria devolvido erro nesse caso.
   } else {
     const { error: insertError } = await admin.from("candidates").insert({
       auth_user_id: userId,

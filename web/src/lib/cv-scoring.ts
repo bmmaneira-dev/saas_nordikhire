@@ -319,6 +319,16 @@ export async function ensureCvBucket(
       public: false,
       fileSizeLimit: MAX_CV_BYTES,
     });
+    return;
+  }
+  // O bucket já existia de antes deste limite ter sido introduzido
+  // (createBucket só corre uma vez) — sem isto, o único tecto de tamanho
+  // ficava só no código da aplicação, nunca no storage em si.
+  if (bucket.file_size_limit !== MAX_CV_BYTES) {
+    await admin.storage.updateBucket(CV_BUCKET, {
+      public: false,
+      fileSizeLimit: MAX_CV_BYTES,
+    });
   }
 }
 

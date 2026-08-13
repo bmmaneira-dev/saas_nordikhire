@@ -9,6 +9,7 @@ import {
   CV_BUCKET,
 } from "@/lib/cv-scoring";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getOrCreateSubscription, getUsageCounts } from "@/lib/billing";
 
 const VIDEO_BUCKET = "application-videos";
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50MB — tecto do projecto Supabase
@@ -17,6 +18,13 @@ async function ensureVideoBucket(admin: ReturnType<typeof createAdminClient>) {
   const { data: bucket } = await admin.storage.getBucket(VIDEO_BUCKET);
   if (!bucket) {
     await admin.storage.createBucket(VIDEO_BUCKET, {
+      public: false,
+      fileSizeLimit: MAX_VIDEO_BYTES,
+    });
+    return;
+  }
+  if (bucket.file_size_limit !== MAX_VIDEO_BYTES) {
+    await admin.storage.updateBucket(VIDEO_BUCKET, {
       public: false,
       fileSizeLimit: MAX_VIDEO_BYTES,
     });
@@ -41,6 +49,22 @@ export async function createVideoUploadTicket(
   }
 
   const admin = createAdminClient();
+
+  // jobId/companyId chegam como argumentos de uma Server Action invocável
+  // directamente — sem isto, qualquer pedido conseguia um URL assinado de
+  // upload para um prefixo `${companyId}/${jobId}/` arbitrário no bucket
+  // privado, incluindo de empresas/vagas que não existem.
+  const { data: job } = await admin
+    .from("jobs")
+    .select("id")
+    .eq("id", jobId)
+    .eq("company_id", companyId)
+    .eq("status", "open")
+    .maybeSingle();
+  if (!job) {
+    return { error: "Esta vaga já não está disponível." };
+  }
+
   await ensureVideoBucket(admin);
 
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
@@ -81,11 +105,17 @@ export async function applyToJob(
   }
 
   const ip = await getClientIp();
-  const { allowed } = await checkRateLimit("job_application", ip, {
-    maxAttempts: 20,
-    windowMinutes: 60,
-  });
-  if (!allowed) {
+  // Só por IP era trivial de contornar (basta rodar o endereço) e não
+  // limitava nada por candidato — junta-se um segundo limite por email, que
+  // não muda a cada pedido, para travar o mesmo atacante a variar de IP.
+  const [byIp, byEmail] = await Promise.all([
+    checkRateLimit("job_application", ip, { maxAttempts: 20, windowMinutes: 60 }),
+    checkRateLimit("job_application_email", email, {
+      maxAttempts: 10,
+      windowMinutes: 60,
+    }),
+  ]);
+  if (!byIp.allowed || !byEmail.allowed) {
     return {
       error: "Demasiadas candidaturas enviadas recentemente. Tenta novamente mais tarde.",
     };
@@ -106,6 +136,29 @@ export async function applyToJob(
   if (!job) {
     return { error: "Esta vaga já não está disponível." };
   }
+
+  // O limite de candidaturas activas do plano da empresa nunca era aplicado
+  // neste caminho (só em jobs/team) — sem isto, candidaturas anónimas podiam
+  // ultrapassar indefinidamente a quota paga da empresa, cada uma disparando
+  // scoring real por IA.
+  const subscription = await getOrCreateSubscription(admin, companyId);
+  const applicationLimit = subscription?.plan.max_active_applications ?? null;
+  if (applicationLimit != null) {
+    const usage = await getUsageCounts(admin, companyId);
+    if (usage.activeApplications >= applicationLimit) {
+      return {
+        error: "Esta empresa atingiu o limite de candidaturas do seu plano. Tenta novamente mais tarde.",
+      };
+    }
+  }
+
+  // videoPath vem directo do formulário — só aceitamos um caminho que
+  // respeite o prefixo emitido por createVideoUploadTicket para ESTA vaga
+  // e empresa, para impedir que alguém associe à sua candidatura um
+  // caminho de vídeo de outra empresa/candidatura no bucket privado.
+  const expectedVideoPrefix = `${companyId}/${jobId}/`;
+  const safeVideoPath =
+    videoPath && videoPath.startsWith(expectedVideoPrefix) ? videoPath : null;
 
   const { data: existingCandidate } = await admin
     .from("candidates")
@@ -169,7 +222,7 @@ export async function applyToJob(
       candidate_id: candidateId,
       source: "site",
       cv_file_url: cvFileUrl,
-      video_url: videoPath,
+      video_url: safeVideoPath,
       status: "received",
     })
     .select("id")

@@ -33,12 +33,15 @@ export async function acceptInvite(
 
   const { data: invite } = await admin
     .from("company_invites")
-    .select("id, company_id, email, role_id, status")
+    .select("id, company_id, email, role_id, status, expires_at")
     .eq("token", token)
     .maybeSingle();
 
   if (!invite || invite.status !== "pending") {
     return { error: "Este convite não é válido ou já foi utilizado." };
+  }
+  if (new Date(invite.expires_at).getTime() < Date.now()) {
+    return { error: "Este convite expirou. Pede um novo convite a quem te convidou." };
   }
 
   const supabase = await createClient();
@@ -91,6 +94,14 @@ export async function acceptInvite(
     .from("company_invites")
     .update({ status: "accepted", accepted_at: new Date().toISOString() })
     .eq("id", invite.id);
+
+  await admin.from("audit_log").insert({
+    company_id: invite.company_id,
+    user_id: userId,
+    action: "team.invite_accepted",
+    entity_type: "company_invites",
+    entity_id: invite.id,
+  });
 
   redirect("/dashboard");
 }

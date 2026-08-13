@@ -43,11 +43,6 @@ export default function ForgotPasswordPage() {
       }
     >
       <form action={formAction} className="flex flex-col gap-4">
-        <input
-          type="hidden"
-          name="origin"
-          value={typeof window !== "undefined" ? window.location.origin : ""}
-        />
         <Field label="Email">
           <Input type="email" name="email" required />
         </Field>

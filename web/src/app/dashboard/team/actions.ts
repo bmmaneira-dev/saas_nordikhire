@@ -5,16 +5,14 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentAppUser } from "@/lib/current-user";
 import { getOrCreateSubscription, getUsageCounts } from "@/lib/billing";
-
-function isAdmin(appUser: { roles: { name: string } | { name: string }[] | null }) {
-  const role = Array.isArray(appUser.roles) ? appUser.roles[0] : appUser.roles;
-  return role?.name === "Admin";
-}
+import { hasPermission } from "@/lib/permissions";
 
 export async function inviteTeammate(_prevState: unknown, formData: FormData) {
   const appUser = await getCurrentAppUser();
   if (!appUser) redirect("/login");
-  if (!isAdmin(appUser)) return { error: "Só administradores podem convidar." };
+  if (!hasPermission(appUser, "team.manage")) {
+    return { error: "Não tens permissão para convidar membros de equipa." };
+  }
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const fullName = String(formData.get("fullName") ?? "").trim() || null;
@@ -82,7 +80,7 @@ export async function inviteTeammate(_prevState: unknown, formData: FormData) {
 export async function revokeInvite(inviteId: string) {
   const appUser = await getCurrentAppUser();
   if (!appUser) redirect("/login");
-  if (!isAdmin(appUser)) return;
+  if (!hasPermission(appUser, "team.manage")) return;
 
   const admin = createAdminClient();
   await admin
@@ -101,15 +99,34 @@ export async function setTeammateActive(
 ) {
   const appUser = await getCurrentAppUser();
   if (!appUser) redirect("/login");
-  if (!isAdmin(appUser)) return;
+  if (!hasPermission(appUser, "team.manage")) return;
   if (userId === appUser.id) return;
 
   const admin = createAdminClient();
-  await admin
+  const { data: updated } = await admin
     .from("users")
     .update({ is_active: isActive })
     .eq("id", userId)
-    .eq("company_id", appUser.company_id);
+    .eq("company_id", appUser.company_id)
+    .select("id")
+    .maybeSingle();
+
+  // Desactivar não bastava para tirar acesso: getCurrentAppUser() já filtra
+  // is_active, mas a sessão existente do Supabase continuava válida até
+  // expirar sozinha. Revoga-a já, para o efeito ser imediato.
+  if (updated && !isActive) {
+    await admin.auth.admin.signOut(userId, "global");
+  }
+
+  if (updated) {
+    await admin.from("audit_log").insert({
+      company_id: appUser.company_id,
+      user_id: appUser.id,
+      action: isActive ? "team.member_activated" : "team.member_deactivated",
+      entity_type: "user",
+      entity_id: userId,
+    });
+  }
 
   revalidatePath("/dashboard/team");
 }

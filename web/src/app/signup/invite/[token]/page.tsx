@@ -15,7 +15,7 @@ export default async function AcceptInvitePage({
   const admin = createAdminClient();
   const { data: invite } = await admin
     .from("company_invites")
-    .select("id, email, full_name, status, companies(name), roles(name)")
+    .select("id, email, full_name, status, expires_at, companies(name), roles(name)")
     .eq("token", token)
     .maybeSingle();
 
@@ -23,12 +23,29 @@ export default async function AcceptInvitePage({
 
   const company = toOne(invite.companies);
   const role = toOne(invite.roles);
+  const isExpired = new Date(invite.expires_at).getTime() < Date.now();
 
   if (invite.status !== "pending") {
     return (
       <AuthShell
         title="Convite já utilizado"
         subtitle="Este link de convite já não é válido. Pede um novo convite a quem te convidou."
+        footer={
+          <Link href="/login" className="font-medium text-primary underline">
+            Ir para o login
+          </Link>
+        }
+      >
+        <></>
+      </AuthShell>
+    );
+  }
+
+  if (isExpired) {
+    return (
+      <AuthShell
+        title="Convite expirado"
+        subtitle="Este link de convite já expirou. Pede um novo convite a quem te convidou."
         footer={
           <Link href="/login" className="font-medium text-primary underline">
             Ir para o login

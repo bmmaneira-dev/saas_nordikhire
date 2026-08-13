@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function login(_prevState: unknown, formData: FormData) {
@@ -22,10 +23,24 @@ export async function login(_prevState: unknown, formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return { error: error.message };
+  }
+
+  const admin = createAdminClient();
+  const { data: appUser } = await admin
+    .from("users")
+    .select("company_id")
+    .eq("id", data.user.id)
+    .maybeSingle();
+  if (appUser) {
+    await admin.from("audit_log").insert({
+      company_id: appUser.company_id,
+      user_id: data.user.id,
+      action: "auth.login",
+    });
   }
 
   redirect("/dashboard");

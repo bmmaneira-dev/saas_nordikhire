@@ -16,6 +16,7 @@ export async function getCurrentAppUser() {
       "id, full_name, email, company_id, companies(name, slug, default_locale), roles(name, permissions)"
     )
     .eq("id", user.id)
+    .eq("is_active", true)
     .single();
 
   return appUser;
