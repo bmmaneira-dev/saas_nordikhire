@@ -108,7 +108,9 @@ create table users (
     is_active           boolean default true,
     invited_by          uuid references users(id),
     last_login_at       timestamptz,
-    created_at          timestamptz default now()
+    created_at          timestamptz default now(),
+    consent_data_processing boolean default false,   -- obrigatório para conformidade de proteção de dados
+    consent_date        timestamptz
 );
 create index idx_users_company on users(company_id);
 create unique index idx_users_company_email on users(company_id, email);
@@ -807,11 +809,19 @@ create policy candidate_owns_optimizations on candidate_profile_optimizations
         select id from candidates where auth_user_id = auth.uid()
     ));
 
+-- jobs e applications usam uma subquery directa a `users` em vez de
+-- current_company_id(): apesar de current_company_id() ser SECURITY DEFINER
+-- (ignora RLS internamente), na prática causava recursão nestas duas tabelas
+-- em produção — corrigido directamente na base de dados, reflectido aqui.
 create policy tenant_isolation_jobs on jobs
-    using (company_id = current_company_id());
+    using (company_id in (
+        select company_id from users where id = auth.uid()
+    ));
 
 create policy tenant_isolation_applications on applications
-    using (company_id = current_company_id());
+    using (company_id in (
+        select company_id from users where id = auth.uid()
+    ));
 
 create policy tenant_isolation_users on users
     using (company_id = current_company_id());
