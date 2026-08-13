@@ -128,6 +128,7 @@ create table company_invites (
     invited_by          uuid not null references users(id),
     token               text not null unique,
     status              text not null default 'pending', -- pending | accepted | revoked
+    expires_at          timestamptz not null default (now() + interval '7 days'),
     created_at          timestamptz default now(),
     accepted_at         timestamptz
 );
@@ -756,10 +757,21 @@ create index idx_interview_practice_candidate on candidate_interview_practice(ca
 -- ============================================================================
 -- 19. ROW LEVEL SECURITY (RLS) — isolamento entre empresas (tenants)
 -- ============================================================================
--- Princípio: cada tabela com company_id só pode ser lida/escrita por
--- utilizadores autenticados cujo próprio registo em `users` pertença à
--- mesma company_id. Activada em TODAS as tabelas do schema — mesmo as sem
--- company_id directo (isoladas via join, ou por dono do registo).
+-- Princípio: cada tabela com company_id só pode ser lida por utilizadores
+-- autenticados cujo próprio registo em `users` pertença à mesma company_id.
+-- Activada em TODAS as tabelas do schema — mesmo as sem company_id directo
+-- (isoladas via join, ou por dono do registo).
+--
+-- IMPORTANTE — todas as políticas abaixo são explicitamente `for select`.
+-- Sem essa cláusula, uma policy assume `for all` e, sem `with check`, o
+-- Postgres reutiliza o `using` também para validar escritas — ou seja,
+-- qualquer utilizador autenticado conseguiria INSERT/UPDATE/DELETE em
+-- qualquer linha visível a ele via PostgREST directamente (chave anon +
+-- sessão própria, ambas efectivamente públicas), contornando por completo a
+-- aplicação. Isto foi encontrado e corrigido num audit de segurança
+-- pré-lançamento (2026-08-13) — a app já escreve exclusivamente através do
+-- cliente service_role (`lib/supabase/admin.ts`), por isso restringir a
+-- `for select` não quebra nenhuma funcionalidade.
 --
 -- Função auxiliar SECURITY DEFINER: evita recursão infinita quando a
 -- política de `users` precisa de consultar a própria tabela `users` para
@@ -805,7 +817,7 @@ alter table mfa_factors enable row level security;
 alter table candidate_profile_optimizations enable row level security;
 
 create policy candidate_owns_optimizations on candidate_profile_optimizations
-    using (candidate_id in (
+    for select using (candidate_id in (
         select id from candidates where auth_user_id = auth.uid()
     ));
 
@@ -814,45 +826,45 @@ create policy candidate_owns_optimizations on candidate_profile_optimizations
 -- (ignora RLS internamente), na prática causava recursão nestas duas tabelas
 -- em produção — corrigido directamente na base de dados, reflectido aqui.
 create policy tenant_isolation_jobs on jobs
-    using (company_id in (
+    for select using (company_id in (
         select company_id from users where id = auth.uid()
     ));
 
 create policy tenant_isolation_applications on applications
-    using (company_id in (
+    for select using (company_id in (
         select company_id from users where id = auth.uid()
     ));
 
 create policy tenant_isolation_users on users
-    using (company_id = current_company_id());
+    for select using (company_id = current_company_id());
 
 create policy tenant_isolation_company_invites on company_invites
-    using (company_id = current_company_id());
+    for select using (company_id = current_company_id());
 
 create policy tenant_isolation_companies on companies
-    using (id = current_company_id());
+    for select using (id = current_company_id());
 
 create policy tenant_isolation_subscriptions on subscriptions
-    using (company_id = current_company_id());
+    for select using (company_id = current_company_id());
 
 create policy tenant_isolation_company_integrations on company_integrations
-    using (company_id = current_company_id());
+    for select using (company_id = current_company_id());
 
 create policy tenant_isolation_notifications_log on notifications_log
-    using (company_id = current_company_id());
+    for select using (company_id = current_company_id());
 
 create policy tenant_isolation_audit_log on audit_log
-    using (company_id = current_company_id());
+    for select using (company_id = current_company_id());
 
 create policy tenant_isolation_api_keys on api_keys
-    using (company_id = current_company_id());
+    for select using (company_id = current_company_id());
 
 create policy tenant_isolation_security_events on security_events
-    using (company_id = current_company_id());
+    for select using (company_id = current_company_id());
 
 -- mfa_factors não tem company_id — isola-se pelo dono directo do registo.
 create policy user_owns_mfa_factors on mfa_factors
-    using (user_id = auth.uid());
+    for select using (user_id = auth.uid());
 
 -- ----------------------------------------------------------------------------
 -- 19.1 Tabelas que tinham RLS desactivada (acesso total via chave anon/
@@ -900,69 +912,69 @@ create policy public_read_test_providers on test_providers
 -- roles: visíveis dentro da própria empresa; company_id null = role global
 -- do sistema, visível a todos.
 create policy tenant_isolation_roles on roles
-    using (company_id = current_company_id() or company_id is null);
+    for select using (company_id = current_company_id() or company_id is null);
 
 create policy tenant_isolation_subscription_usage on subscription_usage
-    using (subscription_id in (
+    for select using (subscription_id in (
         select id from subscriptions where company_id = current_company_id()
     ));
 
 create policy tenant_isolation_job_translations on job_translations
-    using (job_id in (
+    for select using (job_id in (
         select id from jobs where company_id = current_company_id()
     ));
 
 create policy tenant_isolation_job_board_postings on job_board_postings
-    using (job_id in (
+    for select using (job_id in (
         select id from jobs where company_id = current_company_id()
     ));
 
 create policy tenant_isolation_cv_extractions on cv_extractions
-    using (application_id in (
+    for select using (application_id in (
         select id from applications where company_id = current_company_id()
     ));
 
 create policy tenant_isolation_scoring_results on scoring_results
-    using (application_id in (
+    for select using (application_id in (
         select id from applications where company_id = current_company_id()
     ));
 
 create policy tenant_isolation_red_flags on red_flags
-    using (application_id in (
+    for select using (application_id in (
         select id from applications where company_id = current_company_id()
     ));
 
 create policy tenant_isolation_test_assignments on test_assignments
-    using (application_id in (
+    for select using (application_id in (
         select id from applications where company_id = current_company_id()
     ));
 
 create policy tenant_isolation_ai_interviews on ai_interviews
-    using (application_id in (
+    for select using (application_id in (
         select id from applications where company_id = current_company_id()
     ));
 
 create policy tenant_isolation_candidate_feedback on candidate_feedback
-    using (application_id in (
+    for select using (application_id in (
         select id from applications where company_id = current_company_id()
     ));
 
 create policy tenant_isolation_dev_reports on candidate_development_reports
-    using (application_id in (
+    for select using (application_id in (
         select id from applications where company_id = current_company_id()
     ));
 
 create policy tenant_isolation_onboarding on company_onboarding_progress
-    using (company_id = current_company_id());
+    for select using (company_id = current_company_id());
 
 -- candidates: candidato vê/edita o próprio perfil; recrutador vê candidatos
 -- que se candidataram a vagas da sua empresa. Políticas permissivas — juntam-
 -- se com OR.
 create policy candidate_owns_profile on candidates
-    using (auth_user_id = auth.uid());
+    for select using (auth_user_id = auth.uid());
 
 create policy candidates_visible_to_recruiters on candidates
-    using (id in (
+    for select using (id in (
         select candidate_id from applications where company_id = current_company_id()
     ));
 
@@ -975,28 +987,28 @@ create policy candidates_visible_to_recruiters on candidates
 -- isso uma subquery directa aqui criaria um ciclo candidates → applications
 -- → candidates que o Postgres rejeita (recursão infinita nas políticas).
 create policy candidate_views_own_applications on applications
-    using (candidate_id = current_candidate_id());
+    for select using (candidate_id = current_candidate_id());
 
 create policy candidate_owns_oauth_imports on candidate_oauth_imports
-    using (candidate_id = current_candidate_id());
+    for select using (candidate_id = current_candidate_id());
 
 create policy candidate_owns_subscription on candidate_subscriptions
-    using (candidate_id = current_candidate_id());
+    for select using (candidate_id = current_candidate_id());
 
 create policy candidate_owns_interview_practice on candidate_interview_practice
-    using (candidate_id = current_candidate_id());
+    for select using (candidate_id = current_candidate_id());
 
 -- Testes técnicos/comportamentais/psicométricos (secção 6): ao contrário de
 -- candidate_interview_practice, test_assignments ESTÁ ligado a uma
 -- candidatura real (application_id) — o candidato precisa de ver e responder
 -- aos testes que lhe foram atribuídos num processo real.
 create policy candidate_views_own_test_assignments on test_assignments
-    using (application_id in (
+    for select using (application_id in (
         select id from applications where candidate_id = current_candidate_id()
     ));
 
 create policy user_owns_auth_sessions on auth_sessions
-    using (user_id = auth.uid());
+    for select using (user_id = auth.uid());
 
 -- market_skill_snapshots, market_job_title_snapshots, market_trend_forecasts,
 -- external_market_sources: RLS activada, propositadamente SEM política —
