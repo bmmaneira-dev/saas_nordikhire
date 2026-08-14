@@ -33,12 +33,26 @@ export async function checkRateLimit(
 ): Promise<{ allowed: boolean }> {
   const admin = createAdminClient();
 
-  const { data, error } = await admin.rpc("check_and_record_rate_limit", {
-    p_bucket: bucket,
-    p_key: key,
-    p_max_attempts: maxAttempts,
-    p_window_minutes: windowMinutes,
-  });
+  const call = () =>
+    admin.rpc("check_and_record_rate_limit", {
+      p_bucket: bucket,
+      p_key: key,
+      p_max_attempts: maxAttempts,
+      p_window_minutes: windowMinutes,
+    });
+
+  let { data, error } = await call();
+
+  // PGRST303 ("JWT issued at future") é um desfasamento de relógio
+  // transitório entre serviços internos da Supabase ao emitir o JWT
+  // derivado da service-role key nova (sb_secret_...) — já não é a
+  // aplicação a assinar nada, por isso não há nada a corrigir deste lado.
+  // Uma segunda tentativa breve absorve-o sem enfraquecer o limite (o check
+  // continua atómico do lado da BD).
+  if (error?.code === "PGRST303") {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    ({ data, error } = await call());
+  }
 
   // Ao contrário do comportamento anterior, uma falha aqui NÃO deixa passar
   // por omissão — um erro na base de dados não deve desactivar o limite.
