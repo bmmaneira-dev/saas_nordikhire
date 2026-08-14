@@ -22,9 +22,9 @@ Nome "NordikHire" é placeholder — nome definitivo ainda por confirmar (verifi
 
 Correr localmente: `run-web-dev.cmd` (Windows) ou `cd web && npm run dev`.
 
-## Estado da implementação (confirmado por inspeção de `web/src/app`)
+## Estado da implementação (2026-08-14)
 
-Já existem rotas/páginas implementadas para: login, signup (incl. convite de equipa), forgot/reset password, dashboard (jobs, candidates, pipeline, interviews, tests, talent-pool, messages, team, billing, company, settings, reports), área do candidato (login/signup/app própria), páginas legais (terms/privacy), e fluxo de entrevista (`/interview/[id]`). Ou seja, o esqueleto de praticamente todos os ecrãs da especificação já está a ser construído — não é só schema/spec, há bastante código de UI e rotas já em curso.
+Todas as rotas/páginas principais estão implementadas e ligadas a dados reais do Supabase (não é só esqueleto): login, signup (incl. convite de equipa), forgot/reset password, dashboard completo (jobs, candidates, pipeline, interviews, tests, **talent-pool**, messages, team, billing, company, settings, **reports** — estas duas últimas eram placeholders "coming soon" até 2026-08-14, agora funcionais), área do candidato (login/signup/app própria, incl. simulador de entrevistas de prática com **voz de IA via ElevenLabs** — precisa de `ELEVENLABS_API_KEY` no plano Starter+, tem fallback automático para a voz do browser se não configurado/falhar), página pública **"Sobre nós"**, páginas legais (terms/privacy — conteúdo ainda por rever, ver secção de prontidão abaixo), e fluxo de entrevista (`/interview/[id]`).
 
 `web/CLAUDE.md` local já existe e importa `web/AGENTS.md` (regras específicas sobre a versão do Next.js usada — ler antes de mexer em código do Next).
 
@@ -33,8 +33,10 @@ Já existem rotas/páginas implementadas para: login, signup (incl. convite de e
 - `nordikhire_especificacao_projeto.md` — especificação completa (visão, utilizadores, fluxos, decisões de arquitetura, monetização, ecrãs)
 - `nordikhire_schema.sql` — schema completo Postgres/Supabase
 - `nordikhire_politica_protecao_dados.md` — política de proteção de dados (RGPD, lei angolana, LGPD, CCPA)
-- `nordikhire_rls_migration.sql`, `nordikhire_rls_fix_recursion.sql` — Row Level Security
+- `nordikhire_rls_migration.sql`, `nordikhire_rls_fix_recursion.sql`, `nordikhire_rls_scope_to_select_migration.sql` — Row Level Security (a última corrige as políticas de `for all` implícito para `for select` explícito — ver auditoria de segurança abaixo)
 - `nordikhire_candidate_practice_migration.sql`, `nordikhire_application_video_migration.sql`, `nordikhire_team_invites_migration.sql`, `nordikhire_test_assignments_candidate_policy.sql` — migrações incrementais
+
+`nordikhire_schema.sql` é reconciliado periodicamente com a BD Supabase ao vivo (última verificação completa: 2026-08-14, sem divergências — todas as 39 tabelas, 36 políticas RLS, índices e as 3 funções `security definer` conferem).
 
 ## Decisões de arquitetura chave (não violar sem discutir)
 
@@ -46,7 +48,7 @@ Já existem rotas/páginas implementadas para: login, signup (incl. convite de e
 6. **Proibido scraping de perfis de terceiros.** Única integração legítima: "Entrar com LinkedIn" (OpenID Connect) para o próprio candidato.
 7. **Pesquisa é sempre interna** (full-text search Postgres), candidatos sempre filtrados por `company_id`.
 8. **Tendências de mercado**: construído mas com gate — não expor na UI sem volume de dados suficiente.
-9. **Segurança**: MFA obrigatória em contexto de risco; `api_keys.scopes` limitado; `security_events` + `blocked_identities` para deteção de abuso.
+9. **Segurança**: MFA obrigatória em contexto de risco (**ainda só schema — `mfa_factors` existe na BD mas não há nenhum fluxo de enrollment/verificação no código**, não anunciar como funcionalidade activa); `api_keys.scopes` limitado; `security_events` + `blocked_identities` para deteção de abuso.
 10. **Regra inegociável**: `candidate_profile_optimizations` (ferramentas de carreira pagas) nunca tem FK para `applications` nem `scoring_results`, e nunca influencia o score de nenhuma candidatura. Protege a neutralidade percebida pelas empresas-cliente.
 11. **MCP não é prioridade do dia 1.** Integrações (WhatsApp, providers de teste) usam adapter pattern via `company_integrations`. Roadmap futuro: expor o próprio NordikHire como servidor MCP.
 
@@ -57,18 +59,28 @@ Foi feito um audit de segurança completo (2 críticos + vários high/medium/low
 **Único pendente por resolver — não é código, é limite do plano Supabase:**
 "Leaked Password Protection" (verificação de passwords comprometidas via HaveIBeenPwned) só está disponível a partir do **plano Pro** do Supabase. O projeto está num tier que não suporta esta opção — confirmado directamente pela UI do Supabase ("available on Pro Plans and up"). **Acção futura**: ao fazer upgrade do plano Supabase, activar em Authentication → Attack Protection → "Leaked password protection".
 
-## Próximos passos após clonar nesta máquina
+## Prontidão para lançamento de testes (revisão 2026-08-14)
 
-1. Rever com o Bruno o que já está ligado a dados reais (Supabase) vs. só UI estática, já que este resumo só viu a estrutura de ficheiros, não testou o comportamento.
-2. Recriar `web/.env.local` (ver secção abaixo) — não vem no repo.
-3. `npm install` dentro de `web/` antes de correr `npm run dev`.
-4. Em aberto segundo a especificação original: endpoints de API formalizados, roadmap detalhado até v1.0, nome definitivo da marca, secção de preços da landing page.
+Feita uma revisão dedicada a "o que falta para abrir a plataforma a testadores de confiança" (barra mais baixa que lançamento público a pagar). Corrigido nessa revisão: página Sobre nós já não se assume "em construção", passos de onboarding traduzidos nos 4 idiomas (estavam hardcoded em PT) + link errado do passo "explora as ferramentas automáticas" corrigido, `web/.env.example` criado, frase confusa sobre a Anthropic na política de privacidade reescrita.
+
+**Dois bloqueantes reais que continuam por resolver, ambos precisam de informação/decisão do Bruno, não são código:**
+1. **Páginas legais (`web/src/app/legal/terms`, `.../privacy`) têm um aviso amarelo visível a dizer que são rascunho não revisto por advogado**, com campos por preencher: nome legal da empresa, morada, NIF, email de contacto, jurisdição. Falta o Bruno fornecer estes dados reais.
+2. **Zero monitorização/rastreio de erros em produção** (nada tipo Sentry — só `console.error` que desaparece no stdout do servidor). Se um testador reportar um bug, não há forma de investigar a causa sem isto. Precisa de o Bruno criar conta num serviço (Sentry tem plano grátis) e dar a chave.
+
+## Ambiente de desenvolvimento e testes
+
+- `npm install` dentro de `web/` já foi feito nesta máquina; `web/.env.local` já está recriado (ver variáveis abaixo).
+- Correr localmente: `cd web && npm run dev` — nota recorrente: o processo do `next dev` por vezes fica com estado do Turbopack desactualizado após muitas edições seguidas (já aconteceu 2-3 vezes nesta sessão, sintomas: erro `TypeError` a apontar para código já corrigido, ou erro `PGRST303`/JWT ao chamar a Supabase) — reiniciar o processo resolve sempre.
+- Existem duas contas de teste persistentes ligadas à empresa demo "NordikHire Demo Lda" (`e5f11645-9c0e-4e79-8553-b0d3c87b0f40`), ambas com password `Teste@2026!`:
+  - `teste@nordikhire-local-test.dev` — conta de empresa, role Admin.
+  - `candidato-teste@nordikhire-local-test.dev` — conta de candidato, ligada ao candidato "Rui Alexandre Pereira" (já tem candidatura em fase de teste + entrevista em curso, para haver dados reais para ver).
 
 ## Variáveis de ambiente necessárias
 
-Não estão no repo (`.gitignore` exclui `.env*`). Recriar `web/.env.local` com, no mínimo:
-- Credenciais Supabase (URL + chaves anon/service role)
-- Chave de API Anthropic (`ANTHROPIC_API_KEY` ou equivalente)
+Não estão no repo (`.gitignore` exclui `.env*`, com excepção deliberada de `web/.env.example`, que documenta todas). `web/.env.local`:
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` — credenciais Supabase (a service role key é já no formato novo `sb_secret_...`, não um JWT).
+- `ANTHROPIC_API_KEY`.
 - `SITE_URL` — domínio real usado para construir o link de reset de password (`http://localhost:3000` em dev). Adicionado no audit de segurança de 2026-08-13 para deixar de confiar no `origin` enviado pelo cliente; **definir com o domínio de produção real ao fazer deploy**, senão o link de reset fica sempre a apontar para localhost.
+- `ELEVENLABS_API_KEY` / `ELEVENLABS_VOICE_ID` — opcionais, para a voz de IA no simulador de entrevistas de prática. Sem isto (ou se a conta ElevenLabs não tiver plano Starter+), cai automaticamente na voz do browser, sem quebrar nada.
 
-Confirmar nomes exatos das variáveis diretamente no código em `web/src` (procurar por `process.env.`).
+Ver `web/.env.example` para o ficheiro completo pronto a copiar.
