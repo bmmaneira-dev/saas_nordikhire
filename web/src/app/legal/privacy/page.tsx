@@ -66,9 +66,9 @@ export default function PrivacyPolicyPage() {
           são processadas por modelos de inteligência artificial da
           Anthropic, para gerar pontuações, avaliações e sugestões de
           melhoria. Este processamento serve apenas para apoiar a decisão
-          humana de recrutamento e não temos acesso, por parte da Anthropic,
-          a fins de treino dos seus modelos com estes dados sob os termos
-          comerciais aplicáveis a esta integração.
+          humana de recrutamento. Ao abrigo dos termos comerciais da nossa
+          integração com a Anthropic, estes dados não são usados para
+          treinar os modelos deles.
         </p>
       </section>
 

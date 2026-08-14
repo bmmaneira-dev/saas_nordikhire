@@ -40,6 +40,18 @@ export interface Dictionary {
     noInterviewsInProgress: string;
     appliedTo: string;
   };
+  onboardingSteps: {
+    accountCreatedLabel: string;
+    accountCreatedDescription: string;
+    companyProfileLabel: string;
+    companyProfileDescription: string;
+    firstJobLabel: string;
+    firstJobDescription: string;
+    invitedTeamLabel: string;
+    invitedTeamDescription: string;
+    integrationsReviewedLabel: string;
+    integrationsReviewedDescription: string;
+  };
   candidateDashboardHome: {
     greeting: string;
     subtitle: string;
@@ -539,6 +551,19 @@ const pt: Dictionary = {
     interviewsInProgressSection: "Entrevistas em curso",
     noInterviewsInProgress: "Nenhuma entrevista em curso.",
     appliedTo: "candidatou-se a",
+  },
+  onboardingSteps: {
+    accountCreatedLabel: "Conta criada",
+    accountCreatedDescription: "A tua conta e empresa já estão registadas.",
+    companyProfileLabel: "Completa o perfil da empresa",
+    companyProfileDescription: "Indica o sector de actividade da tua empresa.",
+    firstJobLabel: "Cria a tua primeira vaga",
+    firstJobDescription: "Publica uma vaga para começares a receber candidaturas.",
+    invitedTeamLabel: "Convida a tua equipa",
+    invitedTeamDescription: "Junta colegas recrutadores à tua empresa.",
+    integrationsReviewedLabel: "Explora as ferramentas automáticas",
+    integrationsReviewedDescription:
+      "Conhece o scoring de CV, as entrevistas simuladas e os testes gerados automaticamente numa candidatura real.",
   },
   candidateDashboardHome: {
     greeting: "Olá,",

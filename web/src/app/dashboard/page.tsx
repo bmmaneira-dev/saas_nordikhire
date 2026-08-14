@@ -81,7 +81,11 @@ export default async function DashboardPage() {
       .limit(5),
   ]);
 
-  const onboardingSteps = await getOnboardingSteps(admin, appUser.company_id);
+  const onboardingSteps = await getOnboardingSteps(
+    admin,
+    appUser.company_id,
+    dict.onboardingSteps
+  );
   const doneCount = onboardingSteps.filter((s) => s.done).length;
   const allDone = doneCount === onboardingSteps.length;
 

@@ -1,4 +1,5 @@
 import { createAdminClient } from "./supabase/admin";
+import type { Dictionary } from "./i18n/get-dictionary";
 
 export interface OnboardingStep {
   key: string;
@@ -10,7 +11,8 @@ export interface OnboardingStep {
 
 export async function getOnboardingSteps(
   admin: ReturnType<typeof createAdminClient>,
-  companyId: string
+  companyId: string,
+  t: Dictionary["onboardingSteps"]
 ): Promise<OnboardingStep[]> {
   const [companyResult, usersResult, invitesResult, jobsResult, progressResult] =
     await Promise.all([
@@ -39,38 +41,40 @@ export async function getOnboardingSteps(
   return [
     {
       key: "account_created",
-      label: "Conta criada",
-      description: "A tua conta e empresa já estão registadas.",
+      label: t.accountCreatedLabel,
+      description: t.accountCreatedDescription,
       href: "/dashboard",
       done: true,
     },
     {
       key: "company_profile",
-      label: "Completa o perfil da empresa",
-      description: "Indica o sector de actividade da tua empresa.",
+      label: t.companyProfileLabel,
+      description: t.companyProfileDescription,
       href: "/dashboard/settings",
       done: !!companyResult.data?.industry,
     },
     {
       key: "first_job_created",
-      label: "Cria a tua primeira vaga",
-      description: "Publica uma vaga para começares a receber candidaturas.",
+      label: t.firstJobLabel,
+      description: t.firstJobDescription,
       href: "/dashboard/jobs/new",
       done: (jobsResult.count ?? 0) > 0,
     },
     {
       key: "invited_team",
-      label: "Convida a tua equipa",
-      description: "Junta colegas recrutadores à tua empresa.",
+      label: t.invitedTeamLabel,
+      description: t.invitedTeamDescription,
       href: "/dashboard/team",
       done: (usersResult.count ?? 0) > 1 || (invitesResult.count ?? 0) > 0,
     },
     {
       key: "integrations_reviewed",
-      label: "Explora as ferramentas automáticas",
-      description:
-        "Conhece o scoring de CV, as entrevistas simuladas e os testes gerados automaticamente.",
-      href: "/dashboard/billing",
+      label: t.integrationsReviewedLabel,
+      description: t.integrationsReviewedDescription,
+      // Aponta para a lista de vagas — é lá que scoring de CV, entrevistas
+      // simuladas e testes automáticos são visíveis numa candidatura real.
+      // Apontava incorrectamente para /dashboard/billing.
+      href: "/dashboard/jobs",
       done: !!progressResult.data,
     },
   ];

@@ -64,11 +64,9 @@ export default function AboutPage() {
         </section>
 
         <section className="px-6 py-16">
-          <Reveal className="mx-auto max-w-3xl rounded-2xl border border-dashed border-surface-border bg-surface px-6 py-8 text-center">
+          <Reveal className="mx-auto max-w-3xl rounded-2xl border border-surface-border bg-surface px-6 py-8 text-center">
             <p className="text-sm text-muted-foreground">
-              Esta página está em construção — a história e a equipa por
-              trás do NordikHire vão ficar aqui em breve. Entretanto, se
-              quiseres saber mais, fala connosco.
+              Queres saber mais sobre o NordikHire? Fala connosco.
             </p>
             <ButtonLink href="/signup" variant="secondary" className="mt-6">
               Criar conta gratuita

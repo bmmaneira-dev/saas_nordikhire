@@ -42,6 +42,19 @@ const fr: Dictionary = {
     noInterviewsInProgress: "Aucun entretien en cours.",
     appliedTo: "a postulé à",
   },
+  onboardingSteps: {
+    accountCreatedLabel: "Compte créé",
+    accountCreatedDescription: "Ton compte et ton entreprise sont déjà enregistrés.",
+    companyProfileLabel: "Complète le profil de l'entreprise",
+    companyProfileDescription: "Indique le secteur d'activité de ton entreprise.",
+    firstJobLabel: "Crée ta première offre",
+    firstJobDescription: "Publie une offre pour commencer à recevoir des candidatures.",
+    invitedTeamLabel: "Invite ton équipe",
+    invitedTeamDescription: "Ajoute des collègues recruteurs à ton entreprise.",
+    integrationsReviewedLabel: "Explore les outils automatiques",
+    integrationsReviewedDescription:
+      "Découvre le scoring de CV, les entretiens simulés et les tests générés automatiquement sur une candidature réelle.",
+  },
   candidateDashboardHome: {
     greeting: "Bonjour,",
     subtitle: "Résumé de ton activité sur NordikHire.",

@@ -42,6 +42,19 @@ const en: Dictionary = {
     noInterviewsInProgress: "No interviews in progress.",
     appliedTo: "applied to",
   },
+  onboardingSteps: {
+    accountCreatedLabel: "Account created",
+    accountCreatedDescription: "Your account and company are already registered.",
+    companyProfileLabel: "Complete your company profile",
+    companyProfileDescription: "Tell us your company's industry.",
+    firstJobLabel: "Create your first job",
+    firstJobDescription: "Publish a job to start receiving applications.",
+    invitedTeamLabel: "Invite your team",
+    invitedTeamDescription: "Add fellow recruiters to your company.",
+    integrationsReviewedLabel: "Explore the automated tools",
+    integrationsReviewedDescription:
+      "See CV scoring, simulated interviews, and auto-generated tests on a real application.",
+  },
   candidateDashboardHome: {
     greeting: "Hello,",
     subtitle: "Summary of your activity on NordikHire.",
