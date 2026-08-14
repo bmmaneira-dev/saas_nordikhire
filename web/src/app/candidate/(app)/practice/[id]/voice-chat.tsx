@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import { sendPracticeMessage } from "../actions";
 import type { TranscriptTurn } from "@/lib/ai-interview";
 import { Textarea } from "@/components/ui/field";
@@ -46,6 +46,7 @@ export function PracticeVoiceChat({
   const [speechSupported, setSpeechSupported] = useState(true);
   const [listening, setListening] = useState(false);
   const spokenCountRef = useRef(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Câmara do próprio candidato — só para se ver a responder, como numa
   // videochamada real. Nunca é gravada nem enviada para o servidor.
@@ -65,34 +66,49 @@ export function PracticeVoiceChat({
     };
   }, [t.cameraUnavailable]);
 
-  // Fala a última pergunta da IA em voz alta assim que aparece no histórico.
+  // Voz do browser (Web Speech API) — usada só como fallback se a voz de IA
+  // (ElevenLabs, via /speak) falhar ou demorar a responder.
+  const speakWithBrowserVoice = useCallback(
+    (text: string) => {
+      if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = speechLocale;
+      utterance.rate = 0.98;
+      utterance.pitch = 1.03;
+      const speak = () => {
+        const voice = pickVoice(
+          window.speechSynthesis.getVoices(),
+          speechLocale.split("-")[0]
+        );
+        if (voice) utterance.voice = voice;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+      };
+      if (window.speechSynthesis.getVoices().length === 0) {
+        window.speechSynthesis.onvoiceschanged = speak;
+      } else {
+        speak();
+      }
+    },
+    [speechLocale]
+  );
+
+  // Fala a última pergunta da IA em voz alta assim que aparece no histórico,
+  // usando a voz de IA gerada no servidor (ElevenLabs). Se falhar por
+  // qualquer razão (rede, limite atingido, etc.), cai para a voz do browser.
   useEffect(() => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     if (transcript.length <= spokenCountRef.current) return;
-    const last = transcript[transcript.length - 1];
+    const lastIndex = transcript.length - 1;
+    const last = transcript[lastIndex];
     spokenCountRef.current = transcript.length;
     if (last.role !== "ai") return;
 
-    const utterance = new SpeechSynthesisUtterance(last.text);
-    utterance.lang = speechLocale;
-    utterance.rate = 0.98;
-    utterance.pitch = 1.03;
-    const speak = () => {
-      const voice = pickVoice(
-        window.speechSynthesis.getVoices(),
-        speechLocale.split("-")[0]
-      );
-      if (voice) utterance.voice = voice;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-    };
-    // As vozes só ficam disponíveis de forma assíncrona em alguns browsers.
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = speak;
-    } else {
-      speak();
-    }
-  }, [transcript, speechLocale]);
+    const audio = audioRef.current ?? new Audio();
+    audioRef.current = audio;
+    audio.src = `/candidate/practice/${practiceId}/speak?turn=${lastIndex}`;
+    audio.onerror = () => speakWithBrowserVoice(last.text);
+    audio.play().catch(() => speakWithBrowserVoice(last.text));
+  }, [transcript, practiceId, speakWithBrowserVoice]);
 
   useEffect(() => {
     if (state?.success) {
