@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Reveal } from "@/components/marketing/reveal";
 import { ButtonLink } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "Sobre nós",
@@ -64,13 +65,15 @@ export default function AboutPage() {
         </section>
 
         <section className="px-6 py-16">
-          <Reveal className="mx-auto max-w-3xl rounded-2xl border border-surface-border bg-surface px-6 py-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              Queres saber mais sobre o NordikHire? Fala connosco.
-            </p>
-            <ButtonLink href="/signup" variant="secondary" className="mt-6">
-              Criar conta gratuita
-            </ButtonLink>
+          <Reveal className="mx-auto max-w-3xl">
+            <Card className="px-6 py-8 text-center transition-[border-color,box-shadow] duration-200 ease-out hover:border-primary/30 hover:shadow-md">
+              <p className="text-sm text-muted-foreground">
+                Queres saber mais sobre o NordikHire? Fala connosco.
+              </p>
+              <ButtonLink href="/signup" variant="secondary" className="mt-6">
+                Criar conta gratuita
+              </ButtonLink>
+            </Card>
           </Reveal>
         </section>
       </main>
