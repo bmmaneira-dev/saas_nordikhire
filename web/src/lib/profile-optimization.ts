@@ -20,7 +20,7 @@ export interface ProfileOptimizationResult {
 const OPTIMIZATION_SCHEMA = {
   type: "object",
   properties: {
-    overall_score: { type: "number", minimum: 0, maximum: 100 },
+    overall_score: { type: "number" },
     overall_summary: { type: "string" },
     strengths: { type: "array", items: { type: "string" } },
     weaknesses: { type: "array", items: { type: "string" } },

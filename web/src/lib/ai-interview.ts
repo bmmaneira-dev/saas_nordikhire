@@ -32,10 +32,10 @@ export interface EvaluationResult {
 const EVALUATION_SCHEMA = {
   type: "object",
   properties: {
-    communication: { type: "number", minimum: 0, maximum: 10 },
-    technical_depth: { type: "number", minimum: 0, maximum: 10 },
-    problem_solving: { type: "number", minimum: 0, maximum: 10 },
-    cultural_fit: { type: "number", minimum: 0, maximum: 10 },
+    communication: { type: "number" },
+    technical_depth: { type: "number" },
+    problem_solving: { type: "number" },
+    cultural_fit: { type: "number" },
     summary: { type: "string" },
   },
   required: [

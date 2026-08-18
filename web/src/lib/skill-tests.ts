@@ -68,7 +68,7 @@ const GENERATE_SCHEMA = {
 const EVALUATE_SCHEMA = {
   type: "object",
   properties: {
-    overall_score: { type: "number", minimum: 0, maximum: 100 },
+    overall_score: { type: "number" },
     overall_summary: { type: "string" },
     per_question: {
       type: "array",
@@ -78,7 +78,7 @@ const EVALUATE_SCHEMA = {
           question: { type: "string" },
           answer: { type: "string" },
           feedback: { type: "string" },
-          score: { type: "number", minimum: 0, maximum: 10 },
+          score: { type: "number" },
         },
         required: ["question", "answer", "feedback", "score"],
         additionalProperties: false,

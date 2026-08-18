@@ -55,18 +55,18 @@ const SCORING_SCHEMA = {
       ],
       additionalProperties: false,
     },
-    confidence_score: { type: "number", minimum: 0, maximum: 1 },
+    confidence_score: { type: "number" },
     score: {
       type: "object",
       properties: {
-        overall_score: { type: "number", minimum: 0, maximum: 100 },
+        overall_score: { type: "number" },
         breakdown: {
           type: "object",
           properties: {
-            skills_match: { type: "number", minimum: 0, maximum: 100 },
-            experience_match: { type: "number", minimum: 0, maximum: 100 },
-            education_match: { type: "number", minimum: 0, maximum: 100 },
-            language_match: { type: "number", minimum: 0, maximum: 100 },
+            skills_match: { type: "number" },
+            experience_match: { type: "number" },
+            education_match: { type: "number" },
+            language_match: { type: "number" },
           },
           required: [
             "skills_match",
