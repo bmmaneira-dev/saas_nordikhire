@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Reveal } from "@/components/marketing/reveal";
 import { PipelinePreview } from "@/components/marketing/pipeline-preview";
 import { SiteHeader } from "@/components/marketing/site-header";
@@ -164,9 +165,9 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
             </Reveal>
             <div className="mt-10 grid gap-6 md:grid-cols-2">
               <Reveal>
-                <div
+                <Card
                   id="empresas"
-                  className="scroll-mt-24 rounded-2xl border border-surface-border bg-surface p-8"
+                  className="scroll-mt-24 p-8 transition-[border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
                 >
                   <p className="text-sm font-medium text-primary">
                     Para recrutadores
@@ -185,12 +186,12 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
                   >
                     Sou uma empresa
                   </Link>
-                </div>
+                </Card>
               </Reveal>
               <Reveal delay={100}>
-                <div
+                <Card
                   id="candidatos"
-                  className="scroll-mt-24 rounded-2xl border border-surface-border bg-surface p-8"
+                  className="scroll-mt-24 p-8 transition-[border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
                 >
                   <p className="text-sm font-medium text-primary">
                     Para candidatos
@@ -208,7 +209,7 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
                   >
                     Sou candidato
                   </Link>
-                </div>
+                </Card>
               </Reveal>
             </div>
           </div>
@@ -225,10 +226,10 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
               {RECRUITER_FEATURES.map((f, i) => (
                 <Reveal key={f.title} delay={i * 60}>
                   <div
-                    className={`h-full rounded-2xl border p-6 ${
+                    className={`h-full rounded-2xl border p-6 transition-[border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 ${
                       f.accent
-                        ? "border-transparent text-white"
-                        : "border-surface-border bg-surface"
+                        ? "border-transparent text-white hover:shadow-lg"
+                        : "border-surface-border bg-surface hover:border-primary/30 hover:shadow-md"
                     }`}
                     style={
                       f.accent
@@ -349,10 +350,10 @@ export function LandingPage({ plans }: { plans: PlanInfo[] }) {
                 return (
                   <Reveal key={plan.id} delay={i * 80}>
                     <div
-                      className={`flex h-full flex-col rounded-2xl border p-8 ${
+                      className={`flex h-full flex-col rounded-2xl border p-8 transition-[border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 ${
                         highlighted
-                          ? "border-primary bg-surface shadow-lg"
-                          : "border-surface-border bg-surface"
+                          ? "border-primary bg-surface shadow-lg hover:shadow-xl"
+                          : "border-surface-border bg-surface hover:border-primary/30 hover:shadow-md"
                       }`}
                     >
                       {highlighted && (

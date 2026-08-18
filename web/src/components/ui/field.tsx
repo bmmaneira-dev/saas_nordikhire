@@ -10,7 +10,7 @@ import type {
 } from "react";
 
 const fieldClass =
-  "rounded-xl border border-surface-border bg-surface px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20";
+  "rounded-xl border border-surface-border bg-surface px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-[border-color,box-shadow] duration-150 ease-out focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20";
 
 export function Field({
   label,
